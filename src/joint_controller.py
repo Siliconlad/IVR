@@ -41,7 +41,7 @@ class JointController:
 
             # Publish angle for joint 4
             joint4_angle = Float64()
-            joint4_angle.data = (math.pi/2) * math.sin((math.pi/20) * current_time)
+            joint4_angle.data = (math.pi/3) * math.sin((math.pi/20) * current_time)
             self.joint4_pub.publish(joint4_angle)
 
             # Sleep
