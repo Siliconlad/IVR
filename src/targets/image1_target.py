@@ -7,7 +7,7 @@ from rospy import ROSInterruptException
 from cv_bridge import CvBridge, CvBridgeError
 
 from sensor_msgs.msg import Image
-from ivr_assignment.msg import TargetsStamped
+from geometry_msgs.msg import PointStamped
 
 
 class Image1Target:
@@ -20,7 +20,7 @@ class Image1Target:
         self.image = None
 
         # Create publishers
-        self.pos_pub = rospy.Publisher("/estimation/image1/targets", TargetsStamped, queue_size=1)
+        self.sphere_pub = rospy.Publisher("/estimation/image1/sphere", PointStamped, queue_size=1)
 
         # Create subscribers
         self.image_sub = rospy.Subscriber("/image_topic1", Image, self.image_callback)
@@ -37,12 +37,11 @@ class Image1Target:
 
         # TODO: Image processing
 
-        # Publish results
-        pos = TargetsStamped()
+        # Publish estimated position of sphere
+        pos = PointStamped()
         pos.header.stamp = rospy.Time.now()
-        pos.sphere = None
-        pos.cuboid = None
-        self.pos_pub.publish(pos)
+        pos.point = None
+        self.sphere_pub.publish(pos)
 
 
 def main():

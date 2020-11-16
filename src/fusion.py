@@ -7,7 +7,8 @@ import cv2 as cv
 from rospy import ROSInterruptException
 from cv_bridge import CvBridge, CvBridgeError
 
-from ivr_assignment.msg import JointsStamped, TargetsStamped, StateStamped
+from ivr_assignment.msg import JointsStamped
+from geometry_msgs.msg import PointStamped
 
 
 class Fusion:
@@ -19,14 +20,15 @@ class Fusion:
         # Class attributes
 
         # Create publishers
-        self.state_pub = rospy.Publisher("/estimation/pos", StateStamped, queue_size=1)
+        self.joints_pub = rospy.Publisher("/estimation/joints", JointsStamped, queue_size=1)
+        self.sphere_pub = rospy.Publisher("/estimation/sphere", PointStamped, queue_size=1)
 
         # Set up message filtering
         self.image1_joints_sub = message_filters.Subscriber('/estimation/image1/joints', JointsStamped)
         self.image2_joints_sub = message_filters.Subscriber('/estimation/image2/joints', JointsStamped)
 
-        self.image1_targets_sub = message_filters.Subscriber('/estimation/image1/targets', TargetsStamped)
-        self.image2_targets_sub = message_filters.Subscriber('/estimation/image2/targets', TargetsStamped)
+        self.image1_targets_sub = message_filters.Subscriber('/estimation/image1/sphere', PointStamped)
+        self.image2_targets_sub = message_filters.Subscriber('/estimation/image2/sphere', PointStamped)
 
         ts = message_filters.TimeSynchronizer([self.image1_joints_sub, self.image2_joints_sub,
                                                self.image1_targets_sub, self.image2_targets_sub])
@@ -35,11 +37,15 @@ class Fusion:
     def callback(self, image1_joints, image2_joints, image1_targets, image2_targets):
         # TODO: Process points
 
-        # Publish result
-        state = StateStamped()
-        state.header.stamp = rospy.Time.now()
+        # Publish final estimated joint positions
+        joints = JointsStamped()
+        joints.header.stamp = rospy.Time.now()
+        self.joints_pub.publish(joints)
 
-        self.state_pub.publish(state)
+        # Publish final estimated sphere position
+        sphere = PointStamped()
+        sphere.header.stamp = rospy.Time.now()
+        self.sphere_pub.publish(sphere)
 
 
 def main():
