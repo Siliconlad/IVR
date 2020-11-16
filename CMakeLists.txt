@@ -1,5 +1,10 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(ivr_assignment)
+
+## Suppress Compile Warning
+cmake_policy(SET CMP0048 NEW)
+
+## Set the project name and version
+project(ivr_assignment VERSION 0.0.0)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -15,6 +20,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   std_msgs
+  geometry_msgs
   urdf
   cv_bridge
 )
@@ -47,8 +53,8 @@ find_package(catkin REQUIRED COMPONENTS
 ##     find_package(catkin REQUIRED COMPONENTS ...)
 ##   * add "message_runtime" and every package in MSG_DEP_SET to
 #catkin_package(
-#  CATKIN_DEPENDS 
-#  message_runtime 
+#  CATKIN_DEPENDS
+#  message_runtime
 #  )
 ##   * uncomment the add_*_files sections below as needed
 ##     and list every .msg/.srv/.action file to be processed
@@ -56,9 +62,15 @@ find_package(catkin REQUIRED COMPONENTS
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
-# add_message_files(
-#   FILES
-# )
+add_message_files(
+    FILES
+    Joints.msg
+    JointsStamped.msg
+    State.msg
+    StateStamped.msg
+    Targets.msg
+    TargetsStamped.msg
+)
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -75,10 +87,11 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   std_msgs
-# )
+generate_messages(
+    DEPENDENCIES
+    std_msgs
+    geometry_msgs
+)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -109,11 +122,15 @@ find_package(catkin REQUIRED COMPONENTS
 ## LIBRARIES: libraries you create in this project that dependent projects also need
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
-catkin_package(
+#catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES ivr_assignment
 #  CATKIN_DEPENDS controller_manager joint_state_controller robot_state_publisher roscpp rospy std_msgs urdf
 #  DEPENDS system_lib
+#)
+
+catkin_package(
+    CATKIN_DEPENDS message_runtime std_msgs geometry_msgs
 )
 
 ###########
