@@ -67,10 +67,6 @@ add_message_files(
     FILES
     Joints.msg
     JointsStamped.msg
-    State.msg
-    StateStamped.msg
-    Targets.msg
-    TargetsStamped.msg
 )
 
 ## Generate services in the 'srv' folder
