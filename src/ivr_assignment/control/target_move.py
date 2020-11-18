@@ -45,12 +45,12 @@ def move():
     rate.sleep()
 
 
+def main():
+    try:
+        move()
+    except rospy.ROSInterruptException:
+        pass
 
-# run the code if the node is called
+
 if __name__ == '__main__':
-  try:
-    move()
-  except rospy.ROSInterruptException:
-    pass
-
-
+    main()
