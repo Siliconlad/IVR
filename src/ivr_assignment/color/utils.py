@@ -26,10 +26,10 @@ def moments(mask, image=None):
     return moments
 
 
-def centroid(moments):
+def centroid(m):
     # Calculate centroid
-    y_cx = moments['m10'] // moments['m00']
-    y_cy = moments['m01'] // moments['m00']
+    y_cx = m['m10'] // m['m00']
+    y_cy = m['m01'] // m['m00']
 
     return np.array([y_cx, y_cy])
 
