@@ -217,6 +217,15 @@ include_directories(
 ## Install Python scripts
 catkin_install_python(
     PROGRAMS scripts/save_image.py
+             scripts/image1.py
+             scripts/image2.py
+             scripts/fusion.py
+             scripts/joint_controller.py
+             scripts/target_move.py
+             scripts/image1_joints.py
+             scripts/image2_joints.py
+             scripts/image1_target.py
+             scripts/image2_target.py
     DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
