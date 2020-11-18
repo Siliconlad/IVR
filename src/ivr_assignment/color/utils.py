@@ -1,3 +1,4 @@
+import rospy
 import cv2 as cv
 import numpy as np
 
@@ -8,22 +9,6 @@ def shift(point, origin):
     new_point[1] = origin[1] - point[1]
 
     return new_point
-
-
-def moments(mask, image=None):
-    # Get contour
-    contours, hierarchy = cv.findContours(mask, 1, 2)
-    cnt = contours[0]
-
-    # Get moments
-    moments = cv.moments(cnt)
-
-    # Show contour on image if provided
-    if image is not None:
-        cnt_image = cv.drawContours(image.copy(), [cnt], 0, (150, 255, 150), 1)
-        cv.imshow('Contour', cnt_image)
-
-    return moments
 
 
 def centroid(m):
