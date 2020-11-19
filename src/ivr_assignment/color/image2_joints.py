@@ -77,7 +77,8 @@ class Image2Joints:
         self.publish_positions(r_center_m, g_center_m, b_center_m)
 
     def to_meters(self, centroid):
-        # TODO: Deal with None values
+        if centroid is None:
+            return
 
         # Shift centroids such that yellow is origin
         center = utils.shift(centroid, self.yellow)
@@ -87,64 +88,68 @@ class Image2Joints:
 
         return center_m
 
-    def get_yellow(self, hsv, show=False):
+    def get_yellow(self, hsv):
         mask = utils.yellow_mask(hsv)
         contours, hierarchy = cv.findContours(mask, 1, 2)
 
-        # Show contour on image if provided
-        if show:
-            cnt_image = cv.drawContours(self.image.copy(), [contours[0]], 0, (150, 255, 150), 1)
-            cv.imshow('Contour', cnt_image)
+        if len(contours) == 0:
+            rospy.logwarn("Yellow joint could not be detected in image 2!")
+            return
 
-        # TODO: deal with case when there are no contours
+        # Show contour on image if provided
+        # cnt_image = cv.drawContours(self.image.copy(), [contours[0]], 0, (150, 255, 150), 1)
+        # cv.imshow('Contour', cnt_image)
 
         mmts = cv.moments(contours[0])
         centroid = utils.centroid(mmts)
 
         return centroid
 
-    def get_blue(self, hsv, show=False):
+    def get_blue(self, hsv):
         mask = utils.blue_mask(hsv)
         contours, hierarchy = cv.findContours(mask, 1, 2)
 
-        # Show contour on image if provided
-        if show:
-            cnt_image = cv.drawContours(self.image.copy(), [contours[0]], 0, (150, 255, 150), 1)
-            cv.imshow('Contour', cnt_image)
+        if len(contours) == 0:
+            rospy.logwarn("Blue joint could not be detected in image 2!")
+            return
 
-        # TODO: deal with case when there are no contours
+        # Show contour on image if provided
+        # cnt_image = cv.drawContours(self.image.copy(), [contours[0]], 0, (150, 255, 150), 1)
+        # cv.imshow('Contour', cnt_image)
 
         mmts = cv.moments(contours[0])
         centroid = utils.centroid(mmts)
 
         return centroid
 
-    def get_green(self, hsv, show=False):
+    def get_green(self, hsv):
         mask = utils.green_mask(hsv)
         contours, hierarchy = cv.findContours(mask, 1, 2)
 
-        # Show contour on image if provided
-        if show:
-            cnt_image = cv.drawContours(self.image.copy(), [contours[0]], 0, (150, 255, 150), 1)
-            cv.imshow('Contour', cnt_image)
+        if len(contours) == 0:
+            rospy.logwarn("Green joint could not be detected in image 2!")
+            return
 
-        # TODO: deal with case when there are no contours
+        # Show contour on image if provided
+        # cnt_image = cv.drawContours(self.image.copy(), [contours[0]], 0, (150, 255, 150), 1)
+        # cv.imshow('Contour', cnt_image)
 
         mmts = cv.moments(contours[0])
         centroid = utils.centroid(mmts)
 
         return centroid
 
-    def get_red(self, hsv, show=False):
+    def get_red(self, hsv):
         mask = utils.red_mask(hsv)
         contours, hierarchy = cv.findContours(mask, 1, 2)
 
-        # Show contour on image if provided
-        if show:
-            cnt_image = cv.drawContours(self.image.copy(), [contours[0]], 0, (150, 255, 150), 1)
-            cv.imshow('Contour', cnt_image)
+        if len(contours) == 0:
+            rospy.logwarn("Red joint could not be detected in image 2!")
+            return
 
-        # TODO: deal with case when there are no contours
+        # Show contour on image if provided
+        # cnt_image = cv.drawContours(self.image.copy(), [contours[0]], 0, (150, 255, 150), 1)
+        # cv.imshow('Contour', cnt_image)
 
         mmts = cv.moments(contours[0])
         centroid = utils.centroid(mmts)
@@ -157,24 +162,28 @@ class Image2Joints:
         pos.header.stamp = rospy.Time.now()
 
         # Center of red joint in robot frame
-        pos.joints.red.x = red[0]
-        pos.joints.red.y = 0
-        pos.joints.red.z = red[1]
+        if red is not None:
+            pos.joints.red.x = red[0]
+            pos.joints.red.y = 0
+            pos.joints.red.z = red[1]
 
         # Center of green joint in robot frame
-        pos.joints.green.x = green[0]
-        pos.joints.green.y = 0
-        pos.joints.green.z = green[1]
+        if green is not None:
+            pos.joints.green.x = green[0]
+            pos.joints.green.y = 0
+            pos.joints.green.z = green[1]
 
         # Center of blue joint in robot frame
-        pos.joints.blue.x = blue[0]
-        pos.joints.blue.y = 0
-        pos.joints.blue.z = blue[1]
+        if blue is not None:
+            pos.joints.blue.x = blue[0]
+            pos.joints.blue.y = 0
+            pos.joints.blue.z = blue[1]
 
         # Yellow joint is origin of robot frame
-        pos.joints.yellow.x = 0 if yellow is None else yellow[0]
-        pos.joints.yellow.y = 0
-        pos.joints.yellow.z = 0 if yellow is None else yellow[1]
+        if yellow is not None:
+            pos.joints.yellow.x = 0 if yellow is None else yellow[0]
+            pos.joints.yellow.y = 0
+            pos.joints.yellow.z = 0 if yellow is None else yellow[1]
 
         # Publish results
         self.pos_pub.publish(pos)
