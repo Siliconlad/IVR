@@ -2,12 +2,14 @@ import rospy
 import cv2 as cv
 import numpy as np
 
+import ivr_assignment.joints.utils as joints_utils
+import ivr_assignment.joints.utils.image as joints_image
+
 from rospy import ROSInterruptException
 from cv_bridge import CvBridge
 
 from sensor_msgs.msg import Image
 from ivr_assignment.msg import JointsStamped
-from ivr_assignment.color import utils
 
 
 class Image1Joints:
@@ -32,10 +34,10 @@ class Image1Joints:
         hsv = cv.cvtColor(self.image, cv.COLOR_BGR2HSV)
 
         # Get centroids
-        r_centroid = self.get_red(hsv)
-        g_centroid = self.get_green(hsv)
-        b_centroid = self.get_blue(hsv)
-        self.yellow = self.get_yellow(hsv)
+        r_centroid = joints_image.get_red(hsv)
+        g_centroid = joints_image.get_green(hsv)
+        b_centroid = joints_image.get_blue(hsv)
+        self.yellow = joints_image.get_yellow(hsv)
 
         # Calculate the conversion from pixels to meters
         yb_ratio = 2.5 / np.sqrt(np.sum((self.yellow - b_centroid)**2))
@@ -64,9 +66,9 @@ class Image1Joints:
         hsv = cv.cvtColor(self.image, cv.COLOR_BGR2HSV)
 
         # Get centroids
-        r_centroid = self.get_red(hsv)
-        g_centroid = self.get_green(hsv)
-        b_centroid = self.get_blue(hsv)
+        r_centroid = joints_image.get_red(hsv)
+        g_centroid = joints_image.get_green(hsv)
+        b_centroid = joints_image.get_blue(hsv)
 
         # Process centroids
         r_center_m = self.to_meters(r_centroid)
@@ -81,80 +83,12 @@ class Image1Joints:
             return
 
         # Shift centroids such that yellow is origin
-        center = utils.shift(centroid, self.yellow)
+        center = joints_utils.shift(centroid, self.yellow)
 
         # Convert positions to meters
         center_m = self.pixels_to_meters * center
 
         return center_m
-
-    def get_yellow(self, hsv):
-        mask = utils.yellow_mask(hsv)
-        contours, hierarchy = cv.findContours(mask, 1, 2)
-
-        if len(contours) == 0:
-            rospy.logwarn("Yellow joint could not be detected in image 1!")
-            return
-
-        # Show contour on image if provided
-        # cnt_image = cv.drawContours(self.image.copy(), [contours[0]], 0, (150, 255, 150), 1)
-        # cv.imshow('Contour', cnt_image)
-
-        mmts = cv.moments(contours[0])
-        centroid = utils.centroid(mmts)
-
-        return centroid
-
-    def get_blue(self, hsv):
-        mask = utils.blue_mask(hsv)
-        contours, hierarchy = cv.findContours(mask, 1, 2)
-
-        if len(contours) == 0:
-            rospy.logwarn("Blue joint could not be detected in image 1!")
-            return
-
-        # Show contour on image if provided
-        # cnt_image = cv.drawContours(self.image.copy(), [contours[0]], 0, (150, 255, 150), 1)
-        # cv.imshow('Contour', cnt_image)
-
-        mmts = cv.moments(contours[0])
-        centroid = utils.centroid(mmts)
-
-        return centroid
-
-    def get_green(self, hsv):
-        mask = utils.green_mask(hsv)
-        contours, hierarchy = cv.findContours(mask, 1, 2)
-
-        if len(contours) == 0:
-            rospy.logwarn("Green joint could not be detected in image 1!")
-            return
-
-        # Show contour on image if provided
-        # cnt_image = cv.drawContours(self.image.copy(), [contours[0]], 0, (150, 255, 150), 1)
-        # cv.imshow('Contour', cnt_image)
-
-        mmts = cv.moments(contours[0])
-        centroid = utils.centroid(mmts)
-
-        return centroid
-
-    def get_red(self, hsv):
-        mask = utils.red_mask(hsv)
-        contours, hierarchy = cv.findContours(mask, 1, 2)
-
-        if len(contours) == 0:
-            rospy.logwarn("Red joint could not be detected in image 1!")
-            return
-
-        # Show contour on image if provided
-        # cnt_image = cv.drawContours(self.image.copy(), [contours[0]], 0, (150, 255, 150), 1)
-        # cv.imshow('Contour', cnt_image)
-
-        mmts = cv.moments(contours[0])
-        centroid = utils.centroid(mmts)
-
-        return centroid
 
     def publish_positions(self, red, green, blue, yellow=None):
         # Create message
