@@ -2,8 +2,8 @@ import rospy
 import cv2 as cv
 import numpy as np
 
-import ivr_assignment.joints.utils as joints_utils
-import ivr_assignment.joints.utils.image as joints_image
+import ivr_assignment.utils as ivr_utils
+import ivr_assignment.utils.image as ivr_image
 
 from rospy import ROSInterruptException
 from cv_bridge import CvBridge
@@ -34,10 +34,10 @@ class Image2Joints:
         hsv = cv.cvtColor(self.image, cv.COLOR_BGR2HSV)
 
         # Get centroids
-        r_centroid = joints_image.get_red(hsv)
-        g_centroid = joints_image.get_green(hsv)
-        b_centroid = joints_image.get_blue(hsv)
-        self.yellow = joints_image.get_yellow(hsv)
+        r_centroid = ivr_image.get_red(hsv)
+        g_centroid = ivr_image.get_green(hsv)
+        b_centroid = ivr_image.get_blue(hsv)
+        self.yellow = ivr_image.get_yellow(hsv)
 
         # Calculate the conversion from pixels to meters
         yb_ratio = 2.5 / np.sqrt(np.sum((self.yellow - b_centroid)**2))
@@ -66,9 +66,9 @@ class Image2Joints:
         hsv = cv.cvtColor(self.image, cv.COLOR_BGR2HSV)
 
         # Get centroids
-        r_centroid = joints_image.get_red(hsv)
-        g_centroid = joints_image.get_green(hsv)
-        b_centroid = joints_image.get_blue(hsv)
+        r_centroid = ivr_image.get_red(hsv)
+        g_centroid = ivr_image.get_green(hsv)
+        b_centroid = ivr_image.get_blue(hsv)
 
         # Process centroids
         r_center_m = self.to_meters(r_centroid)
@@ -83,7 +83,7 @@ class Image2Joints:
             return
 
         # Shift centroids such that yellow is origin
-        center = joints_utils.shift(centroid, self.yellow)
+        center = ivr_utils.shift(centroid, self.yellow)
 
         # Convert positions to meters
         center_m = self.pixels_to_meters * center

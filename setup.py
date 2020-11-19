@@ -7,10 +7,9 @@ setup_args = generate_distutils_setup(
               'ivr_assignment.control',
               'ivr_assignment.fusion',
               'ivr_assignment.joints',
-              'ivr_assignment.joints.color',
-              'ivr_assignment.joints.utils',
               'ivr_assignment.sensor',
-              'ivr_assignment.target'],
+              'ivr_assignment.target',
+              'ivr_assignment.utils'],
     package_dir={'': 'src'})
 
 setup(**setup_args)
