@@ -18,7 +18,7 @@ class Fusion:
         self.image1_joints_sub = message_filters.Subscriber('/estimation/image1/joints', JointsStamped)
         self.image2_joints_sub = message_filters.Subscriber('/estimation/image2/joints', JointsStamped)
 
-        ts = message_filters.TimeSynchronizer([self.image1_joints_sub, self.image2_joints_sub])
+        ts = message_filters.ApproximateTimeSynchronizer([self.image1_joints_sub, self.image2_joints_sub], queue_size=1, slop=0.05)
         ts.registerCallback(self.callback)
 
     def callback(self, image1_joints, image2_joints):
