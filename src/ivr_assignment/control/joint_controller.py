@@ -19,9 +19,8 @@ class JointController:
         # Set rate to 10Hz
         self.rate = rospy.Rate(100)
 
-        # Set start time
-        while not rospy.is_shutdown() and rospy.get_time() == 0:
-            self.start_time = rospy.get_time()
+        # Get start time
+        self.start_time = rospy.get_time()
 
     def loop(self):
         while not rospy.is_shutdown():
