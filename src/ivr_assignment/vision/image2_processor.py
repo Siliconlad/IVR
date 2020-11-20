@@ -83,17 +83,18 @@ class Image2Processor:
         #    Joint Detection    #
         #########################
 
-        # TODO: Take all contours, find centroid, and take average (occurs for partially obscured joints)
-
         # Get red center
         r_mask = ivr_mask.red_mask(hsv)
         r_contour, _ = cv.findContours(r_mask, 1, 2)
         # No contour means the red joint is not visible
         if len(r_contour) > 0:
-            r_moments = cv.moments(r_contour[0])
-            r_center = ivr_utils.centroid(r_moments)
-            # Add joint detection to image
-            cv_image = cv.drawContours(cv_image, [r_contour[0]], 0, (150, 255, 150), 1)
+            r_center = np.zeros((2,), dtype=np.float64)
+            for contour in r_contour:
+                moments = cv.moments(contour)
+                r_center += ivr_utils.centroid(moments)
+                # Add joint detection to image
+                cv_image = cv.drawContours(cv_image, [contour], 0, (150, 255, 150), 1)
+            r_center = r_center / len(r_contour)
         else:
             rospy.logwarn("Red joint could not be detected in image 2!")
             r_center = None
@@ -103,10 +104,13 @@ class Image2Processor:
         g_contour, _ = cv.findContours(g_mask, 1, 2)
         # No contour means the green joint is not visible
         if len(g_contour) > 0:
-            g_moments = cv.moments(g_contour[0])
-            g_center = ivr_utils.centroid(g_moments)
-            # Add joint detection to image
-            cv_image = cv.drawContours(cv_image, [g_contour[0]], 0, (150, 255, 150), 1)
+            g_center = np.zeros((2,), dtype=np.float64)
+            for contour in g_contour:
+                moments = cv.moments(contour)
+                g_center += ivr_utils.centroid(moments)
+                # Add joint detection to image
+                cv_image = cv.drawContours(cv_image, [contour], 0, (150, 255, 150), 1)
+            g_center = g_center / len(g_contour)
         else:
             rospy.logwarn("Green joint could not be detected in image 2!")
             g_center = None
@@ -116,10 +120,13 @@ class Image2Processor:
         b_contour, _ = cv.findContours(b_mask, 1, 2)
         # No contour means the blue joint is not visible
         if len(b_contour) > 0:
-            b_moments = cv.moments(b_contour[0])
-            b_center = ivr_utils.centroid(b_moments)
-            # Add joint detection to image
-            cv_image = cv.drawContours(cv_image, [b_contour[0]], 0, (150, 255, 150), 1)
+            b_center = np.zeros((2,), dtype=np.float64)
+            for contour in b_contour:
+                moments = cv.moments(contour)
+                b_center += ivr_utils.centroid(moments)
+                # Add joint detection to image
+                cv_image = cv.drawContours(cv_image, [contour], 0, (150, 255, 150), 1)
+            b_center = b_center / len(b_contour)
         else:
             rospy.logwarn("Blue joint could not be detected in image 2!")
             b_center = None
