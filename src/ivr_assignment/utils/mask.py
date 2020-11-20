@@ -1,6 +1,7 @@
 import cv2 as cv
 import numpy as np
 
+
 def yellow_mask(hsv):
     # Define blue range
     yellow_lower = np.array([25, 50, 50])
@@ -14,11 +15,6 @@ def yellow_mask(hsv):
     mask = cv.morphologyEx(mask, cv.MORPH_CLOSE, kernel)
     mask = cv.morphologyEx(mask, cv.MORPH_OPEN, kernel)
     mask = cv.dilate(mask, kernel, iterations=1)
-
-    # Show image section
-    hsv_mask = cv.bitwise_and(hsv, hsv, mask=mask)
-    bgr_mask = cv.cvtColor(hsv_mask, cv.COLOR_HSV2BGR)
-    cv.imshow('Yellow Joint', bgr_mask)
 
     return mask
 
@@ -37,11 +33,6 @@ def blue_mask(hsv):
     mask = cv.morphologyEx(mask, cv.MORPH_OPEN, kernel)
     mask = cv.dilate(mask, kernel, iterations=1)
 
-    # Show image section
-    hsv_mask = cv.bitwise_and(hsv, hsv, mask=mask)
-    bgr_mask = cv.cvtColor(hsv_mask, cv.COLOR_HSV2BGR)
-    cv.imshow('Blue Joint', bgr_mask)
-
     return mask
 
 
@@ -58,11 +49,6 @@ def green_mask(hsv):
     mask = cv.morphologyEx(mask, cv.MORPH_CLOSE, kernel)
     mask = cv.morphologyEx(mask, cv.MORPH_OPEN, kernel)
     mask = cv.dilate(mask, kernel, iterations=1)
-
-    # Show image section
-    hsv_mask = cv.bitwise_and(hsv, hsv, mask=mask)
-    bgr_mask = cv.cvtColor(hsv_mask, cv.COLOR_HSV2BGR)
-    cv.imshow('Green Joint', bgr_mask)
 
     return mask
 
@@ -81,11 +67,6 @@ def red_mask(hsv):
     mask = cv.morphologyEx(mask, cv.MORPH_OPEN, kernel)
     mask = cv.dilate(mask, kernel, iterations=1)
 
-    # Show image section
-    hsv_mask = cv.bitwise_and(hsv, hsv, mask=mask)
-    bgr_mask = cv.cvtColor(hsv_mask, cv.COLOR_HSV2BGR)
-    cv.imshow('Red Joint', bgr_mask)
-
     return mask
 
 
@@ -102,8 +83,5 @@ def orange_mask(hsv):
     mask = cv.morphologyEx(mask, cv.MORPH_CLOSE, kernel)
     mask = cv.morphologyEx(mask, cv.MORPH_OPEN, kernel)
     mask = cv.dilate(mask, kernel, iterations=1)
-
-    # Show mask
-    cv.imshow('Orange Targets', mask)
 
     return mask
