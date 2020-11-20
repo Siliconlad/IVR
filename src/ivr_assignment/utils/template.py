@@ -13,7 +13,8 @@ def match(mask, template, image=None, c=0):
         cv.rectangle(image, top_left, bottom_right, c, 2)
 
     # Calculate the quality of the matching
-    score = np.sum(res[top_left[1]:bottom_right[1], top_left[0]:bottom_right[0]])
+    score = max_val
+
     # Calculate the center of the rectangle
     center = (np.array(top_left) + np.array(bottom_right)) / 2
 
