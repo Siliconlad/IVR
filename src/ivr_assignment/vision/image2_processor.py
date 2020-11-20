@@ -71,7 +71,7 @@ class Image2Processor:
 
         # Load templates
         self.template_sphere = cv.imread('src/ivr_assignment/templates/template_sphere.png', 0)
-        self.template_box = cv.imread('src/ivr_assignment/templates/template_box.png', 0)
+        self.template_box = cv.imread('src/ivr_assignment/templates/template_box_small.png', 0)
 
     def image_callback(self, msg):
         # Get image
