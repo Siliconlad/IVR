@@ -64,6 +64,7 @@ class Image2Processor:
         # Create publishers
         self.joints_pub = rospy.Publisher("/estimation/image2/joints", JointsStamped, queue_size=1)
         self.sphere_pub = rospy.Publisher("/estimation/image2/sphere", PointStamped, queue_size=1)
+        self.box_pub = rospy.Publisher("/estimation/image2/box", PointStamped, queue_size=1)
 
         # Create subscribers
         self.image_sub = rospy.Subscriber("/image2", Image, self.image_callback)
@@ -145,15 +146,18 @@ class Image2Processor:
         sphere_center, sphere_score = ivr_template.match(o_mask, self.template_sphere, cv_image, 255)
         box_center, box_score = ivr_template.match(o_mask, self.template_box, cv_image, 0)
 
-        # If templates match one of the objects is hidden
+        # If templates have the same position, one of the objects is hidden
         if np.linalg.norm(sphere_center - box_center) < 5:
             if sphere_score < box_score:
                 rospy.logwarn("The SPHERE is hidden in image 2!")
                 self.publish_sphere(None)
+                self.publish_box(box_center)
             else:
                 self.publish_sphere(sphere_center)
+                self.publish_box(None)
         else:
             self.publish_sphere(sphere_center)
+            self.publish_box(box_center)
 
         ####################
         #    Show Image    #
@@ -216,6 +220,21 @@ class Image2Processor:
 
         # Publish results
         self.sphere_pub.publish(msg)
+
+    def publish_box(self, center):
+        # Create message
+        msg = PointStamped()
+        msg.header.stamp = rospy.Time.now()
+
+        # Set box position
+        center_m = self.to_meters(center)
+        msg.point.x = center_m[0] if center is not None else math.nan
+        msg.point.y = math.nan
+        msg.point.z = center_m[1] if center is not None else math.nan
+        msg.point.hidden = (center is None)
+
+        # Publish results
+        self.box_pub.publish(msg)
 
 
 def main():

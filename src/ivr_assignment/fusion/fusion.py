@@ -17,7 +17,7 @@ class Fusion:
         self.red = np.array([math.nan, math.nan, math.nan])
         self.green = np.array([math.nan, math.nan, math.nan])
         self.blue = np.array([math.nan, math.nan, math.nan])
-        self.sphere = np.array([math.nan, math.nan, math.nan])
+        self.sphere = np.array([math.nan, math.nan, math.nan])  # TODO: Does this cause a problem?
 
         # Create publishers
         self.joints_pub = rospy.Publisher("/estimation/joints", JointsStamped, queue_size=1)
@@ -30,12 +30,16 @@ class Fusion:
         self.image1_sphere_sub = message_filters.Subscriber('/estimation/image1/sphere', PointStamped)
         self.image2_sphere_sub = message_filters.Subscriber('/estimation/image2/sphere', PointStamped)
 
+        self.image1_box_sub = message_filters.Subscriber('/estimation/image1/box', PointStamped)
+        self.image2_box_sub = message_filters.Subscriber('/estimation/image2/box', PointStamped)
+
         ts = message_filters.ApproximateTimeSynchronizer([self.image1_joints_sub, self.image2_joints_sub,
-                                                          self.image1_sphere_sub, self.image2_sphere_sub],
+                                                          self.image1_sphere_sub, self.image2_sphere_sub,
+                                                          self.image1_box_sub   , self.image2_box_sub    ],
                                                          queue_size=1, slop=0.02)
         ts.registerCallback(self.callback)
 
-    def callback(self, image1_joints, image2_joints, image1_sphere, image2_sphere):
+    def callback(self, image1_joints, image2_joints, image1_sphere, image2_sphere, image1_box, image2_box):
         # Extract red joint
         red1 = image1_joints.joints.red
         red2 = image2_joints.joints.red
@@ -48,6 +52,9 @@ class Fusion:
         # Extract target sphere
         sphere1 = image1_sphere.point
         sphere2 = image2_sphere.point
+        # Extract box
+        box1 = image1_box.point
+        box2 = image2_box.point
 
         ###################
         #    Red Joint    #
@@ -66,7 +73,7 @@ class Fusion:
             diff = []
 
             # Calculate distances
-            for obj in [green1, blue1, sphere1]:
+            for obj in [green1, blue1, sphere1, box1]:
                 if not obj.hidden:
                     objects.append(obj)
 
@@ -93,7 +100,7 @@ class Fusion:
             diff = []
 
             # Calculate distances
-            for obj in [green2, blue2, sphere2]:
+            for obj in [green2, blue2, sphere2, box2]:
                 if not obj.hidden:
                     objects.append(obj)
 
@@ -135,7 +142,7 @@ class Fusion:
             objects = []
             diff = []
 
-            for obj in [red1, blue1, sphere1]:
+            for obj in [red1, blue1, sphere1, box1]:
                 if not obj.hidden:
                     objects.append(obj)
 
@@ -161,7 +168,7 @@ class Fusion:
             objects = []
             diff = []
 
-            for obj in [red2, blue2, sphere2]:
+            for obj in [red2, blue2, sphere2, box2]:
                 if not obj.hidden:
                     objects.append(obj)
 
@@ -203,7 +210,7 @@ class Fusion:
             objects = []
             diff = []
 
-            for obj in [red1, green1, sphere1]:
+            for obj in [red1, green1, sphere1, box1]:
                 if not obj.hidden:
                     objects.append(obj)
 
@@ -229,7 +236,7 @@ class Fusion:
             objects = []
             diff = []
 
-            for obj in [red2, green2, sphere2]:
+            for obj in [red2, green2, sphere2, box2]:
                 if not obj.hidden:
                     objects.append(obj)
 
@@ -271,7 +278,7 @@ class Fusion:
             objects = []
             diff = []
 
-            for obj in [red1, green1, blue1]:
+            for obj in [red1, green1, blue1, box1]:
                 if not obj.hidden:
                     objects.append(obj)
 
@@ -297,7 +304,7 @@ class Fusion:
             objects = []
             diff = []
 
-            for obj in [red2, green2, blue2]:
+            for obj in [red2, green2, blue2, box2]:
                 if not obj.hidden:
                     objects.append(obj)
 
