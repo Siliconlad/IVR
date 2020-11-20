@@ -20,7 +20,6 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   std_msgs
-  geometry_msgs
   urdf
   cv_bridge
   message_filters
@@ -66,8 +65,10 @@ catkin_python_setup()
 add_message_files(
     DIRECTORY msg
     FILES
-    Joints.msg
-    JointsStamped.msg
+        Joints.msg
+        JointsStamped.msg
+        Point.msg
+        PointStamped.msg
 )
 
 ## Generate services in the 'srv' folder
@@ -88,7 +89,6 @@ add_message_files(
 generate_messages(
     DEPENDENCIES
     std_msgs
-    geometry_msgs
 )
 
 ################################################
@@ -128,7 +128,7 @@ generate_messages(
 #)
 
 catkin_package(
-    CATKIN_DEPENDS message_runtime std_msgs geometry_msgs
+    CATKIN_DEPENDS message_runtime std_msgs
 )
 
 ###########
@@ -181,10 +181,17 @@ include_directories(
 
 ## Mark executable scripts (Python etc.) for installation
 ## in contrast to setup.py, you can choose the destination
-# install(PROGRAMS
-#   scripts/my_python_script
-#   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-# )
+catkin_install_python(
+        PROGRAMS scripts/fusion.py
+                 scripts/image1.py
+                 scripts/image1_processor.py
+                 scripts/image2.py
+                 scripts/image2_processor.py
+                 scripts/joint_controller.py
+                 scripts/save_image.py
+                 scripts/target_move.py
+        DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
 
 ## Mark executables for installation
 ## See http://docs.ros.org/melodic/api/catkin/html/howto/format1/building_executables.html
@@ -213,21 +220,6 @@ include_directories(
 #   # myfile2
 #   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 # )
-
-## Install Python scripts
-catkin_install_python(
-    PROGRAMS scripts/save_image.py
-             scripts/image1.py
-             scripts/image2.py
-             scripts/fusion.py
-             scripts/joint_controller.py
-             scripts/target_move.py
-             scripts/image1_joints.py
-             scripts/image2_joints.py
-             scripts/image1_target.py
-             scripts/image2_target.py
-    DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-)
 
 #############
 ## Testing ##

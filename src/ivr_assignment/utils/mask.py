@@ -87,3 +87,23 @@ def red_mask(hsv):
     cv.imshow('Red Joint', bgr_mask)
 
     return mask
+
+
+def orange_mask(hsv):
+    # Define orange range
+    orange_lower = np.array([10, 50, 50])
+    orange_upper = np.array([20, 255, 255])
+
+    # Threshold image
+    mask = cv.inRange(hsv, orange_lower, orange_upper)
+
+    # Apply some smoothing
+    kernel = cv.getStructuringElement(cv.MORPH_ELLIPSE, (3, 3))
+    mask = cv.morphologyEx(mask, cv.MORPH_CLOSE, kernel)
+    mask = cv.morphologyEx(mask, cv.MORPH_OPEN, kernel)
+    mask = cv.dilate(mask, kernel, iterations=1)
+
+    # Show mask
+    cv.imshow('Orange Targets', mask)
+
+    return mask

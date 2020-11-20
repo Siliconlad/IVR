@@ -48,7 +48,6 @@
     <depend>roscpp</depend>
     <depend>rospy</depend>
     <depend>std_msgs</depend>
-    <depend>geometry_msgs</depend>
 
     <!-- ROS Packages -->
     <exec_depend>cv_bridge</exec_depend>
