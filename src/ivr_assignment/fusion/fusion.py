@@ -36,7 +36,7 @@ class Fusion:
         ts = message_filters.ApproximateTimeSynchronizer([self.image1_joints_sub, self.image2_joints_sub,
                                                           self.image1_sphere_sub, self.image2_sphere_sub,
                                                           self.image1_box_sub   , self.image2_box_sub    ],
-                                                         queue_size=1, slop=0.02)
+                                                         queue_size=1, slop=0.05)
         ts.registerCallback(self.callback)
 
     def callback(self, image1_joints, image2_joints, image1_sphere, image2_sphere, image1_box, image2_box):
