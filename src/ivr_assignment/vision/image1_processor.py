@@ -153,6 +153,7 @@ class Image1Processor:
                 self.publish_sphere(None)
                 self.publish_box(box_center)
             else:
+                rospy.logwarn("The BOX is hidden in image 1!")
                 self.publish_sphere(sphere_center)
                 self.publish_box(None)
         else:
