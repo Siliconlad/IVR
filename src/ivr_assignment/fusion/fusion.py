@@ -62,8 +62,8 @@ class Fusion:
 
         # If we have perfect visibility of the joint
         if not red1.hidden and not red2.hidden:
-            r_x = red2.x
-            r_y = red1.y
+            r_x = (0.7 * red2.x) + (0.3 * self.red[0])
+            r_y = (0.7 * red1.y) + (0.3 * self.red[1])
             r_z = (red1.z + red2.z) / 2
             r_center = np.array([r_x, r_y, r_z])
 
@@ -132,8 +132,8 @@ class Fusion:
 
         # If we have perfect visibility of the joint
         if not green1.hidden and not green2.hidden:
-            g_x = green2.x
-            g_y = green1.y
+            g_x = (0.7 * green2.x) + (0.3 * self.green[0])
+            g_y = (0.7 * green1.y) + (0.3 * self.green[1])
             g_z = (green1.z + green2.z) / 2
             g_center = np.array([g_x, g_y, g_z])
 
@@ -200,8 +200,8 @@ class Fusion:
 
         # If we have perfect visibility of the joint
         if not blue1.hidden and not blue2.hidden:
-            b_x = blue2.x
-            b_y = blue1.y
+            b_x = (0.7 * blue2.x) + (0.3 * self.blue[0])
+            b_y = (0.7 * blue1.y) + (0.3 * self.blue[1])
             b_z = (blue1.z + blue2.z) / 2
             b_center = np.array([b_x, b_y, b_z])
 
@@ -268,10 +268,10 @@ class Fusion:
 
         # If we have perfect visibility of the target sphere
         if not sphere1.hidden and not sphere2.hidden:
-            r_x = sphere2.x
-            r_y = sphere1.y
-            r_z = (sphere1.z + sphere2.z) / 2
-            s_center = np.array([r_x, r_y, r_z])
+            s_x = (0.7 * sphere2.x) + (0.3 * self.sphere[0])
+            s_y = (0.7 * sphere1.y) + (0.3 * self.sphere[1])
+            s_z = (sphere1.z + sphere2.z) / 2
+            s_center = np.array([s_x, s_y, s_z])
 
         # If the target sphere is hidden in image1 but not in image2
         elif sphere1.hidden and not sphere2.hidden:
