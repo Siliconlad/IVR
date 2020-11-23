@@ -34,8 +34,9 @@ class ImageConverter:
         # Uncomment if you want to save the image
         # cv.imwrite('image_copy.png', cv_image1)
 
-        _ = cv.imshow('Image 1', self.cv_image1)
-        cv.waitKey(1)
+        # Uncomment if you want to show the image
+        #_ = cv.imshow('Image 1', self.cv_image1)
+        #cv.waitKey(1)
 
         # Publish the results
         try:
