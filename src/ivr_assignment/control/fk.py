@@ -5,7 +5,7 @@ from numpy import sin, cos
 
 from rospy import ROSInterruptException
 from std_msgs.msg import Float64
-from ivr_assignment.msg import PointStamped, FloatStamped
+from ivr_assignment.msg import FloatStamped, JointsStamped
 
 class ForwardKinematics:
 
@@ -14,8 +14,7 @@ class ForwardKinematics:
         rospy.init_node('forward_kinematics')
 
         # Create publishers
-        self.green_pub = rospy.Publisher("/fk/joint/green", PointStamped, queue_size=1)
-        self.red_pub = rospy.Publisher("/fk/joint/red", PointStamped, queue_size=1)
+        self.green_pub = rospy.Publisher("/fk/joints", JointsStamped, queue_size=1)
 
         # Create subscriber
         self.joint2_sub = message_filters.Subscriber('/joint2/angle', FloatStamped)
@@ -60,23 +59,23 @@ class ForwardKinematics:
         a_0_3 = np.matmul(a_0_2, a_2_3)
         a_0_4 = np.matmul(a_0_3, a_3_4)
 
-        # Green position
-        g_x, g_y, g_z, _ = a_0_3[:, -1].reshape(-1)
-        msg = PointStamped()
+        # Publish position
+        msg = JointsStamped()
         msg.header.stamp = rospy.Time.now()
-        msg.point.x = g_x
-        msg.point.y = g_y
-        msg.point.z = g_z
-        self.green_pub.publish(msg)
 
         # Red position
         r_x, r_y, r_z, _ = a_0_4[:, -1].reshape(-1)
-        msg = PointStamped()
-        msg.header.stamp = rospy.Time.now()
-        msg.point.x = r_x
-        msg.point.y = r_y
-        msg.point.z = r_z
-        self.red_pub.publish(msg)
+        msg.joints.red.x = r_x
+        msg.joints.red.y = r_y
+        msg.joints.red.z = r_z
+
+        # Green position
+        g_x, g_y, g_z, _ = a_0_3[:, -1].reshape(-1)
+        msg.joints.green.x = g_x
+        msg.joints.green.y = g_y
+        msg.joints.green.z = g_z
+
+        self.green_pub.publish(msg)
 
 def main():
     _ = ForwardKinematics()
