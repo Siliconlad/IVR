@@ -1,5 +1,5 @@
-import math
 import rospy
+from numpy import sin, cos, pi
 
 from rospy import ROSInterruptException
 from std_msgs.msg import Float64
@@ -33,32 +33,32 @@ class JointController:
 
             # Publish angle for joint 2
             joint2_angle = Float64()
-            joint2_angle.data = (math.pi/2) * math.sin((math.pi/15) * current_time)
+            joint2_angle.data = (pi/2) * sin((pi/15) * current_time)
             self.joint2_pub.publish(joint2_angle)
 
             joint2_angle = FloatStamped()
-            joint2_angle.angle = (math.pi/2) * math.sin((math.pi/15) * current_time)
+            joint2_angle.angle = (pi/2) * sin((pi/15) * current_time)
             joint2_angle.header.stamp = rospy.Time.now()
             self.joint2_truth_pub.publish(joint2_angle)
 
             # Publish angle for joint 3
             joint3_angle = Float64()
-            joint3_angle.data = (math.pi/2) * math.sin((math.pi/18) * current_time)
+            joint3_angle.data = (pi/2) * sin((pi/18) * current_time)
             self.joint3_pub.publish(joint3_angle)
             self.joint3_pub.publish(joint3_angle)
 
             joint3_angle = FloatStamped()
-            joint3_angle.angle = (math.pi/2) * math.sin((math.pi/18) * current_time)
+            joint3_angle.angle = (pi/2) * sin((pi/18) * current_time)
             joint3_angle.header.stamp = rospy.Time.now()
             self.joint3_truth_pub.publish(joint3_angle)
 
             # Publish angle for joint 4
             joint4_angle = Float64()
-            joint4_angle.data = (math.pi/3) * math.sin((math.pi/20) * current_time)
+            joint4_angle.data = (pi/3) * sin((pi/20) * current_time)
             self.joint4_pub.publish(joint4_angle)
 
             joint4_angle = FloatStamped()
-            joint4_angle.angle = (math.pi/3) * math.sin((math.pi/20) * current_time)
+            joint4_angle.angle = (pi/3) * sin((pi/20) * current_time)
             joint4_angle.header.stamp = rospy.Time.now()
             self.joint4_truth_pub.publish(joint4_angle)
 

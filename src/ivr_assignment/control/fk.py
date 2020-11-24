@@ -1,8 +1,7 @@
-import math
 import rospy
 import message_filters
 import numpy as np
-from math import sin, cos
+from numpy import sin, cos
 
 from rospy import ROSInterruptException
 from std_msgs.msg import Float64
