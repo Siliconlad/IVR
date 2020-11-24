@@ -69,6 +69,7 @@ add_message_files(
         JointsStamped.msg
         Point.msg
         PointStamped.msg
+        FloatStamped.msg
 )
 
 ## Generate services in the 'srv' folder
@@ -190,6 +191,7 @@ catkin_install_python(
                  scripts/joint_controller.py
                  scripts/save_image.py
                  scripts/target_move.py
+                 scripts/fk.py
         DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
