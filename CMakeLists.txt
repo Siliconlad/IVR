@@ -65,6 +65,8 @@ catkin_python_setup()
 add_message_files(
     DIRECTORY msg
     FILES
+        Angles.msg
+        AnglesStamped.msg
         Joints.msg
         JointsStamped.msg
         Point.msg
@@ -188,6 +190,7 @@ catkin_install_python(
                  scripts/image1_processor.py
                  scripts/image2.py
                  scripts/image2_processor.py
+                 scripts/joint_angles.py
                  scripts/joint_controller.py
                  scripts/save_image.py
                  scripts/target_move.py
