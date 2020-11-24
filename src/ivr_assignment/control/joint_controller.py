@@ -1,5 +1,5 @@
 import rospy
-from numpy import sin, cos, pi
+from numpy import sin, pi
 
 from rospy import ROSInterruptException
 from std_msgs.msg import Float64
