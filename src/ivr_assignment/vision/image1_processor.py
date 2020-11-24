@@ -1,4 +1,3 @@
-import math
 import rospy
 import cv2 as cv
 import numpy as np
@@ -185,23 +184,23 @@ class Image1Processor:
 
         # Set red joint position
         r_center_m = self.to_meters(red)
-        pos.joints.red.x = math.nan
-        pos.joints.red.y = r_center_m[0] if red is not None else math.nan
-        pos.joints.red.z = r_center_m[1] if red is not None else math.nan
+        pos.joints.red.x = np.nan
+        pos.joints.red.y = r_center_m[0] if red is not None else np.nan
+        pos.joints.red.z = r_center_m[1] if red is not None else np.nan
         pos.joints.red.hidden = (red is None)
 
         # Set green joint position
         g_center_m = self.to_meters(green)
-        pos.joints.green.x = math.nan
-        pos.joints.green.y = g_center_m[0] if green is not None else math.nan
-        pos.joints.green.z = g_center_m[1] if green is not None else math.nan
+        pos.joints.green.x = np.nan
+        pos.joints.green.y = g_center_m[0] if green is not None else np.nan
+        pos.joints.green.z = g_center_m[1] if green is not None else np.nan
         pos.joints.green.hidden = (green is None)
 
         # Set blue joint position
         b_center_m = self.to_meters(blue)
-        pos.joints.blue.x = math.nan
-        pos.joints.blue.y = b_center_m[0] if blue is not None else math.nan
-        pos.joints.blue.z = b_center_m[1] if blue is not None else math.nan
+        pos.joints.blue.x = np.nan
+        pos.joints.blue.y = b_center_m[0] if blue is not None else np.nan
+        pos.joints.blue.z = b_center_m[1] if blue is not None else np.nan
         pos.joints.blue.hidden = (blue is None)
 
         # Publish results
@@ -214,9 +213,9 @@ class Image1Processor:
 
         # Set sphere position
         center_m = self.to_meters(center)
-        msg.point.x = math.nan
-        msg.point.y = center_m[0] if center is not None else math.nan
-        msg.point.z = center_m[1] if center is not None else math.nan
+        msg.point.x = np.nan
+        msg.point.y = center_m[0] if center is not None else np.nan
+        msg.point.z = center_m[1] if center is not None else np.nan
         msg.point.hidden = (center is None)
 
         # Publish results
@@ -229,9 +228,9 @@ class Image1Processor:
 
         # Set box position
         center_m = self.to_meters(center)
-        msg.point.x = math.nan
-        msg.point.y = center_m[0] if center is not None else math.nan
-        msg.point.z = center_m[1] if center is not None else math.nan
+        msg.point.x = np.nan
+        msg.point.y = center_m[0] if center is not None else np.nan
+        msg.point.z = center_m[1] if center is not None else np.nan
         msg.point.hidden = (center is None)
 
         # Publish results

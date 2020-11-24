@@ -1,4 +1,3 @@
-import math
 import rospy
 import message_filters
 import numpy as np
@@ -13,11 +12,11 @@ class Fusion:
         # Initialize the node
         rospy.init_node('fusion')
 
-        # Previous position of the objects
-        self.red = np.array([math.nan, math.nan, math.nan])
-        self.green = np.array([math.nan, math.nan, math.nan])
-        self.blue = np.array([math.nan, math.nan, math.nan])
-        self.sphere = np.array([math.nan, math.nan, math.nan])  # TODO: Does this cause a problem?
+        # Initial position of the objects
+        self.red = np.array([0, 0, 9])
+        self.green = np.array([0, 0, 6])
+        self.blue = np.array([0, 0, 2.5])
+        self.sphere = np.array([0, 0, 0])  # TODO: Does this cause a problem?
 
         # Create publishers
         self.joints_pub = rospy.Publisher("/estimation/joints", JointsStamped, queue_size=1)
