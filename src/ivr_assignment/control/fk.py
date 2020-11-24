@@ -4,8 +4,8 @@ import numpy as np
 from numpy import sin, cos
 
 from rospy import ROSInterruptException
-from std_msgs.msg import Float64
 from ivr_assignment.msg import FloatStamped, JointsStamped
+
 
 class ForwardKinematics:
 
@@ -77,6 +77,7 @@ class ForwardKinematics:
 
         self.green_pub.publish(msg)
 
+
 def main():
     _ = ForwardKinematics()
 
@@ -85,6 +86,3 @@ def main():
     except ROSInterruptException:
         print("Shutting down...")
 
-
-if __name__ == '__main__':
-    main()

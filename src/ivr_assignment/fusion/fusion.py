@@ -387,7 +387,6 @@ class Fusion:
     # position (maybe excluding z). We can also include the previous calculated position as well.
 
 
-
 def main():
     _ = Fusion()
 
@@ -395,7 +394,3 @@ def main():
         rospy.spin()
     except ROSInterruptException:
         print("Shutting down...")
-
-
-if __name__ == '__main__':
-    main()

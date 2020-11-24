@@ -50,7 +50,3 @@ def main():
         move()
     except rospy.ROSInterruptException:
         pass
-
-
-if __name__ == '__main__':
-    main()
