@@ -193,6 +193,7 @@ catkin_install_python(
                  scripts/save_image.py
                  scripts/target_move.py
                  scripts/fk.py
+                 scripts/angles.py
         DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
