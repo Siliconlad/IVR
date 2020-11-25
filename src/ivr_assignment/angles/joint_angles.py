@@ -2,7 +2,7 @@ import rospy
 import numpy as np
 
 from rospy import ROSInterruptException
-from ivr_assignment.msg import JointsStamped, AnglesStamped
+from ivr_assignment.msg import StateStamped, AnglesStamped
 
 
 class JointAngles:
@@ -12,11 +12,11 @@ class JointAngles:
         rospy.init_node('joint_angles')
 
         # Create publishers
-        self.angles_pub = rospy.Publisher("/estimation/angles", AnglesStamped, queue_size=1)
+        self.angles_pub = rospy.Publisher("/fusion/angles", AnglesStamped, queue_size=1)
 
         # Create subscribers
-        # self.joints_sub = rospy.Subscriber("/estimation/joints", JointsStamped, self.joints_callback)
-        self.joints_sub = rospy.Subscriber("/fk/joints", JointsStamped, self.joints_callback)
+        self.joints_sub = rospy.Subscriber("/fusion/state", StateStamped, self.joints_callback)
+        #self.joints_sub = rospy.Subscriber("/fk/joints", JointsStamped, self.joints_callback)
 
         # Store previous angles
         self.theta_2 = 0
@@ -28,14 +28,14 @@ class JointAngles:
 
     def joints_callback(self, msg):
         # Get position of red joint
-        r_x = msg.joints.red.x
-        r_y = msg.joints.red.y
-        r_z = msg.joints.red.z
+        r_x = msg.state.red.x
+        r_y = msg.state.red.y
+        r_z = msg.state.red.z
 
         # Get position of green joint
-        g_x = msg.joints.green.x
-        g_y = msg.joints.green.y
-        g_z = msg.joints.green.z
+        g_x = msg.state.green.x
+        g_y = msg.state.green.y
+        g_z = msg.state.green.z
 
         # Get second angle of blue joint (rotation about x)
         try:
@@ -51,7 +51,7 @@ class JointAngles:
 
         # Get angle of green joint
         try:
-            theta_4 = np.arccos((3.5 * (r_x - g_x)) / (3 * g_x))
+            theta_4 = np.arccos(self.norm((3.5 * (r_x - g_x)) / (3 * g_x)))
             sin_theta_4 = ((r_y - g_y) + 3 * np.sin(theta_2) * np.cos(theta_3) * np.cos(theta_4) ) / (3 * np.cos(theta_3))
 
             if sin_theta_4 != np.nan:

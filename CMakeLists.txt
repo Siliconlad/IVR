@@ -67,11 +67,11 @@ add_message_files(
     FILES
         Angles.msg
         AnglesStamped.msg
-        Joints.msg
-        JointsStamped.msg
+        FloatStamped.msg
         Point.msg
         PointStamped.msg
-        FloatStamped.msg
+        State.msg
+        StateStamped.msg
 )
 
 ## Generate services in the 'srv' folder

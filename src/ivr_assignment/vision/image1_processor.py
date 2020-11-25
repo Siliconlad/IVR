@@ -3,16 +3,16 @@ import cv2 as cv
 import numpy as np
 
 import ivr_assignment.utils as ivr_utils
-import ivr_assignment.utils.mask as ivr_mask
-import ivr_assignment.utils.template as ivr_template
+import ivr_assignment.utils.vision as ivr_vision
 
 from rospy import ROSInterruptException
 from cv_bridge import CvBridge
 
 from sensor_msgs.msg import Image
-from ivr_assignment.msg import JointsStamped
-from ivr_assignment.msg import PointStamped
+from ivr_assignment.msg import StateStamped
 
+
+# TODO: save position of blue joint in case it gets covered
 
 class Image1Processor:
 
@@ -23,47 +23,8 @@ class Image1Processor:
         # Initialize the bridge between openCV and ROS
         self.bridge = CvBridge()
 
-        #############################
-        #    Process First Image    #
-        #############################
-
-        msg = rospy.wait_for_message("/image1", Image)
-        cv_image = self.bridge.imgmsg_to_cv2(msg, "bgr8")
-
-        # Convert to HSV color space
-        hsv = cv.cvtColor(cv_image, cv.COLOR_BGR2HSV)
-
-        # Get green center
-        g_mask = ivr_mask.green_mask(hsv)
-        g_contour, _ = cv.findContours(g_mask, 1, 2)
-        g_moments = cv.moments(g_contour[0])
-        g_center = ivr_utils.centroid(g_moments)
-
-        # Get blue center
-        b_mask = ivr_mask.blue_mask(hsv)
-        b_contour, _ = cv.findContours(b_mask, 1, 2)
-        b_moments = cv.moments(b_contour[0])
-        b_center = ivr_utils.centroid(b_moments)
-
-        # Get yellow center
-        y_mask = ivr_mask.yellow_mask(hsv)
-        y_contour, _ = cv.findContours(y_mask, 1, 2)
-        y_moments = cv.moments(y_contour[0])
-        self.yellow = ivr_utils.centroid(y_moments)
-
-        # Calculate the conversion from pixels to meters
-        yb_ratio = 2.5 / np.sqrt(np.sum((self.yellow - b_center)**2))
-        bg_ratio = 3.5 / np.sqrt(np.sum((b_center - g_center)**2))
-        self.pixels_to_meters = (yb_ratio + bg_ratio) / 2
-
-        ########################
-        #    Configure Node    #
-        ########################
-
         # Create publishers
-        self.joints_pub = rospy.Publisher("/estimation/image1/joints", JointsStamped, queue_size=1)
-        self.sphere_pub = rospy.Publisher("/estimation/image1/sphere", PointStamped, queue_size=1)
-        self.box_pub = rospy.Publisher("/estimation/image1/box", PointStamped, queue_size=1)
+        self.state_pub = rospy.Publisher("/image1/state", StateStamped, queue_size=1)
 
         # Create subscribers
         self.image_sub = rospy.Subscriber("/camera1/robot/image_raw", Image, self.image_callback)
@@ -71,6 +32,12 @@ class Image1Processor:
         # Load templates
         self.template_sphere = cv.imread('src/ivr_assignment/templates/template_sphere.png', 0)
         self.template_box = cv.imread('src/ivr_assignment/templates/template_box.png', 0)
+
+        # Save yellow joint position
+        self.y_center = None
+
+        # Save pixel to meter conversion ratio
+        self.pixels_to_meters = None
 
     def image_callback(self, msg):
         # Get image
@@ -83,158 +50,111 @@ class Image1Processor:
         #    Joint Detection    #
         #########################
 
+        # Get yellow center
+        _, cv_image = ivr_vision.get_yellow_joint(hsv, cv_image)
+
         # Get red center
-        r_mask = ivr_mask.red_mask(hsv)
-        r_contour, _ = cv.findContours(r_mask, 1, 2)
-        # No contour means the red joint is not visible
-        if len(r_contour) > 0:
-            r_center = np.zeros((2,), dtype=np.float64)
-            for contour in r_contour:
-                moments = cv.moments(contour)
-                r_center += ivr_utils.centroid(moments)
-                # Add joint detection to image
-                cv_image = cv.drawContours(cv_image, [contour], 0, (150, 255, 150), 1)
-            r_center = r_center / len(r_contour)
-        else:
-            rospy.logwarn("Red joint could not be detected in image 1!")
-            r_center = None
+        r_center, cv_image = ivr_vision.get_red_joint(hsv, cv_image)
 
         # Get green center
-        g_mask = ivr_mask.green_mask(hsv)
-        g_contour, _ = cv.findContours(g_mask, 1, 2)
-        # No contour means the green joint is not visible
-        if len(g_contour) > 0:
-            g_center = np.zeros((2,), dtype=np.float64)
-            for contour in g_contour:
-                moments = cv.moments(contour)
-                g_center += ivr_utils.centroid(moments)
-                # Add joint detection to image
-                cv_image = cv.drawContours(cv_image, [contour], 0, (150, 255, 150), 1)
-            g_center = g_center / len(g_contour)
-        else:
-            rospy.logwarn("Green joint could not be detected in image 1!")
-            g_center = None
+        g_center, cv_image = ivr_vision.get_green_joint(hsv, cv_image)
 
         # Get blue center
-        b_mask = ivr_mask.blue_mask(hsv)
-        b_contour, _ = cv.findContours(b_mask, 1, 2)
-        # No contour means the blue joint is not visible
-        if len(b_contour) > 0:
-            b_center = np.zeros((2,), dtype=np.float64)
-            for contour in b_contour:
-                moments = cv.moments(contour)
-                b_center += ivr_utils.centroid(moments)
-                # Add joint detection to image
-                cv_image = cv.drawContours(cv_image, [contour], 0, (150, 255, 150), 1)
-            b_center = b_center / len(b_contour)
+        b_center, cv_image = ivr_vision.get_blue_joint(hsv, cv_image)
+
+        # Get orange templates
+        sphere_center, box_center, cv_image = ivr_vision.get_targets(hsv, self.template_sphere, self.template_box, cv_image)
+
+        ###################################
+        #    Set Yellow Joint To Center   #
+        ###################################
+
+        # Get yellow center
+        if self.y_center is None:
+            self.y_center, _ = ivr_vision.get_yellow_joint(hsv)
+
+            # Calculate pixel to meter ratio
+            yb_ratio = 2.5 / np.linalg.norm(self.y_center - b_center)
+            bg_ratio = 3.5 / np.linalg.norm(b_center - g_center)
+            self.pixels_to_meters = (yb_ratio + bg_ratio) / 2
+
+        if r_center is not None:
+            r_center = ivr_utils.shift(r_center, self.y_center)
+            r_center *= self.pixels_to_meters
         else:
-            rospy.logwarn("Blue joint could not be detected in image 1!")
-            b_center = None
+            rospy.logwarn("No RED joint in image 1!")
+
+        if g_center is not None:
+            g_center = ivr_utils.shift(g_center, self.y_center)
+            g_center *= self.pixels_to_meters
+        else:
+            rospy.logwarn("No GREEN joint in image 1!")
+
+        if b_center is not None:
+            b_center = ivr_utils.shift(b_center, self.y_center)
+            b_center *= self.pixels_to_meters
+        else:
+            rospy.logwarn("No BLUE joint in image 1!")
+
+        if sphere_center is not None:
+            sphere_center = ivr_utils.shift(sphere_center, self.y_center)
+            sphere_center *= self.pixels_to_meters
+        else:
+            rospy.logwarn("No ORANGE SPHERE in image 1!")
+
+        if box_center is not None:
+            box_center = ivr_utils.shift(box_center, self.y_center)
+            box_center *= self.pixels_to_meters
+        else:
+            rospy.logwarn("No ORANGE BOX in image 1!")
 
         # Publish positions
-        self.publish_joints(r_center, g_center, b_center)
-
-        ##########################
-        #    Target Detection    #
-        ##########################
-
-        # Get orange mask
-        o_mask = ivr_mask.orange_mask(hsv)
-
-        # Match templates
-        sphere_center, sphere_score = ivr_template.match(o_mask, self.template_sphere, cv_image, 255)
-        box_center, box_score = ivr_template.match(o_mask, self.template_box, cv_image, 0)
-
-        # If templates have the same position, one of the objects is hidden
-        if np.linalg.norm(sphere_center - box_center) < 5:
-            if sphere_score < box_score:
-                rospy.logwarn("The SPHERE is hidden in image 1!")
-                self.publish_sphere(None)
-                self.publish_box(box_center)
-            else:
-                rospy.logwarn("The BOX is hidden in image 1!")
-                self.publish_sphere(sphere_center)
-                self.publish_box(None)
-        else:
-            self.publish_sphere(sphere_center)
-            self.publish_box(box_center)
+        self.publish_state(r_center, g_center, b_center, sphere_center, box_center)
 
         ####################
         #    Show Image    #
         ####################
 
-        cv.imshow('Processed Image', cv_image)
+        cv.imshow('Processed Image 1', cv_image)
         cv.waitKey(1)
 
-    def to_meters(self, centroid):
-        if centroid is None:
-            return
-
-        # Shift centroids such that yellow is origin
-        center = ivr_utils.shift(centroid, self.yellow)
-        # Convert positions to meters
-        center_m = self.pixels_to_meters * center
-
-        return center_m
-
-    def publish_joints(self, red, green, blue):
+    def publish_state(self, red, green, blue, sphere, box):
         # Create message
-        pos = JointsStamped()
-        pos.header.stamp = rospy.Time.now()
+        msg = StateStamped()
+        msg.header.stamp = rospy.Time.now()
 
         # Set red joint position
-        r_center_m = self.to_meters(red)
-        pos.joints.red.x = np.nan
-        pos.joints.red.y = r_center_m[0] if red is not None else np.nan
-        pos.joints.red.z = r_center_m[1] if red is not None else np.nan
-        pos.joints.red.hidden = (red is None)
+        msg.state.red.x = np.nan
+        msg.state.red.y = red[0] if red is not None else np.nan
+        msg.state.red.z = red[1] if red is not None else np.nan
+        msg.state.red.hidden = (red is None)
 
         # Set green joint position
-        g_center_m = self.to_meters(green)
-        pos.joints.green.x = np.nan
-        pos.joints.green.y = g_center_m[0] if green is not None else np.nan
-        pos.joints.green.z = g_center_m[1] if green is not None else np.nan
-        pos.joints.green.hidden = (green is None)
+        msg.state.green.x = np.nan
+        msg.state.green.y = green[0] if green is not None else np.nan
+        msg.state.green.z = green[1] if green is not None else np.nan
+        msg.state.green.hidden = (green is None)
 
         # Set blue joint position
-        b_center_m = self.to_meters(blue)
-        pos.joints.blue.x = np.nan
-        pos.joints.blue.y = b_center_m[0] if blue is not None else np.nan
-        pos.joints.blue.z = b_center_m[1] if blue is not None else np.nan
-        pos.joints.blue.hidden = (blue is None)
-
-        # Publish results
-        self.joints_pub.publish(pos)
-
-    def publish_sphere(self, center):
-        # Create message
-        msg = PointStamped()
-        msg.header.stamp = rospy.Time.now()
+        msg.state.blue.x = np.nan
+        msg.state.blue.y = blue[0] if blue is not None else np.nan
+        msg.state.blue.z = blue[1] if blue is not None else np.nan
+        msg.state.blue.hidden = (blue is None)
 
         # Set sphere position
-        center_m = self.to_meters(center)
-        msg.point.x = np.nan
-        msg.point.y = center_m[0] if center is not None else np.nan
-        msg.point.z = center_m[1] if center is not None else np.nan
-        msg.point.hidden = (center is None)
-
-        # Publish results
-        self.sphere_pub.publish(msg)
-
-    def publish_box(self, center):
-        # Create message
-        msg = PointStamped()
-        msg.header.stamp = rospy.Time.now()
+        msg.state.sphere.x = np.nan
+        msg.state.sphere.y = sphere[0] if sphere is not None else np.nan
+        msg.state.sphere.z = sphere[1] if sphere is not None else np.nan
+        msg.state.sphere.hidden = (sphere is None)
 
         # Set box position
-        center_m = self.to_meters(center)
-        msg.point.x = np.nan
-        msg.point.y = center_m[0] if center is not None else np.nan
-        msg.point.z = center_m[1] if center is not None else np.nan
-        msg.point.hidden = (center is None)
+        msg.state.box.x = np.nan
+        msg.state.box.y = box[0] if box is not None else np.nan
+        msg.state.box.z = box[1] if box is not None else np.nan
+        msg.state.box.hidden = (box is None)
 
         # Publish results
-        self.box_pub.publish(msg)
+        self.state_pub.publish(msg)
 
 
 def main():

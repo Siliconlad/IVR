@@ -3,7 +3,7 @@ import message_filters
 import numpy as np
 
 from rospy import ROSInterruptException
-from ivr_assignment.msg import JointsStamped, PointStamped
+from ivr_assignment.msg import StateStamped
 
 
 class Fusion:
@@ -19,41 +19,32 @@ class Fusion:
         self.sphere = np.array([0, 0, 0])  # TODO: Does this cause a problem?
 
         # Create publishers
-        self.joints_pub = rospy.Publisher("/estimation/joints", JointsStamped, queue_size=1)
-        self.sphere_pub = rospy.Publisher("/estimation/sphere", PointStamped, queue_size=1)
+        self.state_pub = rospy.Publisher("/fusion/state", StateStamped, queue_size=1)
 
         # Set up message filtering
-        self.image1_joints_sub = message_filters.Subscriber('/estimation/image1/joints', JointsStamped)
-        self.image2_joints_sub = message_filters.Subscriber('/estimation/image2/joints', JointsStamped)
+        self.image1_state_sub = message_filters.Subscriber('/image1/state', StateStamped)
+        self.image2_state_sub = message_filters.Subscriber('/image2/state', StateStamped)
 
-        self.image1_sphere_sub = message_filters.Subscriber('/estimation/image1/sphere', PointStamped)
-        self.image2_sphere_sub = message_filters.Subscriber('/estimation/image2/sphere', PointStamped)
-
-        self.image1_box_sub = message_filters.Subscriber('/estimation/image1/box', PointStamped)
-        self.image2_box_sub = message_filters.Subscriber('/estimation/image2/box', PointStamped)
-
-        ts = message_filters.ApproximateTimeSynchronizer([self.image1_joints_sub, self.image2_joints_sub,
-                                                          self.image1_sphere_sub, self.image2_sphere_sub,
-                                                          self.image1_box_sub   , self.image2_box_sub    ],
-                                                         queue_size=1, slop=0.05)
+        ts = message_filters.ApproximateTimeSynchronizer([self.image1_state_sub, self.image2_state_sub],
+                                                         queue_size=1, slop=0.017)
         ts.registerCallback(self.callback)
 
-    def callback(self, image1_joints, image2_joints, image1_sphere, image2_sphere, image1_box, image2_box):
+    def callback(self, image1_state, image2_state):
         # Extract red joint
-        red1 = image1_joints.joints.red
-        red2 = image2_joints.joints.red
+        red1 = image1_state.state.red
+        red2 = image2_state.state.red
         # Extract green joint
-        green1 = image1_joints.joints.green
-        green2 = image2_joints.joints.green
+        green1 = image1_state.state.green
+        green2 = image2_state.state.green
         # Extract blue joint
-        blue1 = image1_joints.joints.blue
-        blue2 = image2_joints.joints.blue
+        blue1 = image1_state.state.blue
+        blue2 = image2_state.state.blue
         # Extract target sphere
-        sphere1 = image1_sphere.point
-        sphere2 = image2_sphere.point
+        sphere1 = image1_state.state.sphere
+        sphere2 = image2_state.state.sphere
         # Extract box
-        box1 = image1_box.point
-        box2 = image2_box.point
+        box1 = image1_state.state.box
+        box2 = image2_state.state.box
 
         ###################
         #    Red Joint    #
@@ -63,7 +54,8 @@ class Fusion:
         if not red1.hidden and not red2.hidden:
             r_x = (0.7 * red2.x) + (0.3 * self.red[0])
             r_y = (0.7 * red1.y) + (0.3 * self.red[1])
-            r_z = (red1.z + red2.z) / 2
+            r_z = (0.5 * red1.z) + (0.5 * red2.z)
+
             r_center = np.array([r_x, r_y, r_z])
 
         # If the red joint is hidden in image1 but not in image2
@@ -133,7 +125,8 @@ class Fusion:
         if not green1.hidden and not green2.hidden:
             g_x = (0.7 * green2.x) + (0.3 * self.green[0])
             g_y = (0.7 * green1.y) + (0.3 * self.green[1])
-            g_z = (green1.z + green2.z) / 2
+            g_z = (0.5 * green1.z) + (0.5 * green2.z)
+
             g_center = np.array([g_x, g_y, g_z])
 
         # If the green joint is hidden in image1 but not in image2
@@ -159,7 +152,7 @@ class Fusion:
             # Calculate center of green joint
             g_x = green2.x
             g_y = (0.5 * g_y) + (0.5 * self.green[1])
-            g_z = green2.z
+            g_z = (0.5 * green2.z) + (0.5 * self.green[2])
             g_center = np.array([g_x, g_y, g_z])
 
         # If the green joint is hidden in image2 but not in image1
@@ -185,7 +178,7 @@ class Fusion:
             # Calculate center of green joint
             g_x = (0.5 * g_x) + (0.5 * self.green[0])
             g_y = green1.y
-            g_z = green1.z
+            g_z = (0.5 * green1.z) + (0.5 *  self.green[2])
             g_center = np.array([g_x, g_y, g_z])
 
         # If the green joint is completely hidden
@@ -329,6 +322,12 @@ class Fusion:
             rospy.logwarn("Target sphere is completely hidden! Using previous position...")
             s_center = self.sphere
 
+        ########################
+        #    Adjust for bias   #
+        ########################
+
+        s_center[2] += 1
+
         #########################
         #    Publish Results    #
         #########################
@@ -347,39 +346,30 @@ class Fusion:
         #    Joint Positions    #
         #########################
 
-        joints = JointsStamped()
-        joints.header.stamp = rospy.Time.now()
+        msg = StateStamped()
+        msg.header.stamp = rospy.Time.now()
 
         # Red joint position
-        joints.joints.red.x = red[0]
-        joints.joints.red.y = red[1]
-        joints.joints.red.z = red[2]
+        msg.state.red.x = red[0]
+        msg.state.red.y = red[1]
+        msg.state.red.z = red[2]
 
         # Green joint position
-        joints.joints.green.x = green[0]
-        joints.joints.green.y = green[1]
-        joints.joints.green.z = green[2]
+        msg.state.green.x = green[0]
+        msg.state.green.y = green[1]
+        msg.state.green.z = green[2]
 
         # Blue joint position
-        joints.joints.blue.x = blue[0]
-        joints.joints.blue.y = blue[1]
-        joints.joints.blue.z = blue[2]
-
-        self.joints_pub.publish(joints)
-
-        #########################
-        #    Target Position    #
-        #########################
-
-        target = PointStamped()
-        target.header.stamp = rospy.Time.now()
+        msg.state.blue.x = blue[0]
+        msg.state.blue.y = blue[1]
+        msg.state.blue.z = blue[2]
 
         # Target position
-        target.point.x = sphere[0]
-        target.point.y = sphere[1]
-        target.point.z = sphere[2]
+        msg.state.sphere.x = sphere[0]
+        msg.state.sphere.y = sphere[1]
+        msg.state.sphere.z = sphere[2]
 
-        self.sphere_pub.publish(target)
+        self.state_pub.publish(msg)
 
     # If an object is not visible from one of the cameras, then it must be blocked by something with the same z value.
     # We can use the z value of the hidden object from the other camera perspective because it is impossible for the
