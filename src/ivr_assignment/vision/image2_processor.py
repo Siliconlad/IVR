@@ -66,7 +66,7 @@ class Image2Processor:
         self.box_pub = rospy.Publisher("/estimation/image2/box", PointStamped, queue_size=1)
 
         # Create subscribers
-        self.image_sub = rospy.Subscriber("/image2", Image, self.image_callback)
+        self.image_sub = rospy.Subscriber("/camera2/robot/image_raw", Image, self.image_callback)
 
         # Load templates
         self.template_sphere = cv.imread('src/ivr_assignment/templates/template_sphere.png', 0)

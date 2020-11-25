@@ -186,9 +186,7 @@ include_directories(
 ## in contrast to setup.py, you can choose the destination
 catkin_install_python(
         PROGRAMS scripts/fusion.py
-                 scripts/image1.py
                  scripts/image1_processor.py
-                 scripts/image2.py
                  scripts/image2_processor.py
                  scripts/joint_angles.py
                  scripts/joint_controller.py
