@@ -25,10 +25,12 @@ class JointController:
         self.rate = rospy.Rate(100)
 
         # Get start time
-        self.start_time = rospy.get_time()
-
+        self.start_time = None;
     def loop(self):
         while not rospy.is_shutdown():
+            if self.start_time is None:
+                self.start_time = rospy.get_time()
+
             current_time = rospy.get_time() - self.start_time
 
             # Publish angle for joint 2
