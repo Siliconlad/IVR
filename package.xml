@@ -40,6 +40,7 @@
     <!-- Use doc_depend for packages you need only for building documentation: -->
     <!--   <doc_depend>doxygen</doc_depend> -->
     <buildtool_depend>catkin</buildtool_depend>
+    <buildtool_depend>python3-setuptools</buildtool_depend>
 
     <depend>controller_manager</depend>
     <depend>joint_state_controller</depend>
