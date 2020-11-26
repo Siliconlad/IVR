@@ -178,7 +178,7 @@ class Fusion:
             # Calculate center of green joint
             g_x = (0.5 * g_x) + (0.5 * self.green[0])
             g_y = green1.y
-            g_z = (0.5 * green1.z) + (0.5 *  self.green[2])
+            g_z = (0.5 * green1.z) + (0.5 * self.green[2])
             g_center = np.array([g_x, g_y, g_z])
 
         # If the green joint is completely hidden
@@ -194,7 +194,8 @@ class Fusion:
         if not blue1.hidden and not blue2.hidden:
             b_x = (0.7 * blue2.x) + (0.3 * self.blue[0])
             b_y = (0.7 * blue1.y) + (0.3 * self.blue[1])
-            b_z = (blue1.z + blue2.z) / 2
+            b_z = (0.5 * blue1.z) + (0.5 * blue2.z)
+
             b_center = np.array([b_x, b_y, b_z])
 
         # If the blue joint is hidden in image1 but not in image2
@@ -262,7 +263,8 @@ class Fusion:
         if not sphere1.hidden and not sphere2.hidden:
             s_x = (0.7 * sphere2.x) + (0.3 * self.sphere[0])
             s_y = (0.7 * sphere1.y) + (0.3 * self.sphere[1])
-            s_z = (sphere1.z + sphere2.z) / 2
+            s_z = (0.5 * sphere1.z) + (0.5 * sphere2.z)
+
             s_center = np.array([s_x, s_y, s_z])
 
         # If the target sphere is hidden in image1 but not in image2
@@ -328,6 +330,10 @@ class Fusion:
 
         s_center[2] += 1
 
+        r_center[2] += 1
+
+        g_center[2] += 1
+
         #########################
         #    Publish Results    #
         #########################
@@ -370,11 +376,6 @@ class Fusion:
         msg.state.sphere.z = sphere[2]
 
         self.state_pub.publish(msg)
-
-    # If an object is not visible from one of the cameras, then it must be blocked by something with the same z value.
-    # We can use the z value of the hidden object from the other camera perspective because it is impossible for the
-    # object to be hidden from both cameras (hopefully). Hence, find the object with the closest z value and use its
-    # position (maybe excluding z). We can also include the previous calculated position as well.
 
 
 def main():

@@ -9,13 +9,11 @@ def match(mask, template, image=None, c=0):
     top_left = max_loc
     bottom_right = (top_left[0] + w, top_left[1] + h)
 
+    # Draw bounding box
     if image is not None:
         cv.rectangle(image, top_left, bottom_right, c, 2)
-
-    # Calculate the quality of the matching
-    score = max_val
 
     # Calculate the center of the rectangle
     center = (np.array(top_left) + np.array(bottom_right)) / 2
 
-    return center, score
+    return center, max_val

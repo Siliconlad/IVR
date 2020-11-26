@@ -11,7 +11,7 @@ def shift(point, origin):
 
 def centroid(m):
     # Calculate centroid
-    y_cx = m['m10'] // m['m00']
-    y_cy = m['m01'] // m['m00']
+    cx = m['m10'] // m['m00']
+    cy = m['m01'] // m['m00']
 
-    return np.array([y_cx, y_cy])
+    return np.array([cx, cy])

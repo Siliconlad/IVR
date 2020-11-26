@@ -57,6 +57,7 @@ class JointController:
             angles_msg.angles.theta_2 = theta2
             angles_msg.angles.theta_3 = theta3
             angles_msg.angles.theta_4 = theta4
+            self.joints_pub.publish(angles_msg)
 
             # Sleep
             self.rate.sleep()
