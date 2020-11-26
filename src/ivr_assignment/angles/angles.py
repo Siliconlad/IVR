@@ -15,6 +15,7 @@ class JointAngles:
         self.angles_pub = rospy.Publisher("/fusion/angles", AnglesStamped, queue_size=1)
 
         # Create subscribers
+
         self.joints_sub = rospy.Subscriber("/fusion/state", StateStamped, self.joints_callback)
         #self.joints_sub = rospy.Subscriber("/fk/state", StateStamped, self.joints_callback)
 
@@ -49,12 +50,21 @@ class JointAngles:
         else:
             theta_3 = self.theta_3
 
+        cos_theta_4 = 3.5 * (r_x - g_x) / (3 * g_x)
+        sin_theta_4 = (g_y - r_y - (3 * np.sin(theta_2) * np.cos(theta_3) * cos_theta_4)) / (3 * np.cos(theta_2))
+
+        if not np.allclose(np.abs(theta_2), np.pi/2):
+            theta_4 = np.arctan2(sin_theta_4, cos_theta_4)
+        else:
+            theta_4 = self.theta_4
+
         # Store results
         self.theta_2 = theta_2
         self.theta_3 = theta_3
+        self.theta_4 = theta_4
 
         # Publish results
-        self.publish_angles(0, theta_2, theta_3, np.nan)
+        self.publish_angles(0, theta_2, theta_3, theta_4)
 
     def true_angle_callback(self, msg):
         self.true_angle = msg.data
