@@ -26,6 +26,23 @@ class JointController:
 
         # Get start time
         self.start_time = None;
+        
+    def rotate_joints(angleSets):
+        joint1_angle = Float64()
+        joint2_angle = Float64()
+        joint3_angle = Float64()
+        joint4_angle = Float64()
+        
+        for angles in angleSets:
+            joint1_angle.data, joint2_angle.data, joint3_angle.data, joint4_angle.data = angles
+            
+            self.joint1_pub.publish(joint1_angle)
+            self.joint2_pub.publish(joint2_angle)
+            self.joint3_pub.publish(joint3_angle)
+            self.joint4_pub.publish(joint4_angle)
+            
+            self.rate.sleep()
+        
     def loop(self):
         while not rospy.is_shutdown():
             if self.start_time is None:
