@@ -1,6 +1,3 @@
-#!/usr/bin/env python3
-
-
 import rospy
 import numpy as np
 from std_msgs.msg import String
@@ -48,12 +45,8 @@ def move():
     rate.sleep()
 
 
-
-# run the code if the node is called
-if __name__ == '__main__':
-  try:
-    move()
-  except rospy.ROSInterruptException:
-    pass
-
-
+def main():
+    try:
+        move()
+    except rospy.ROSInterruptException:
+        pass
