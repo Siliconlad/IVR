@@ -32,6 +32,7 @@ class Controller:
         self.time_previous_step2 = np.array([rospy.get_time()], dtype='float64')   
         # initialize error and derivative of error for trajectory tracking  
         self.error = np.array([0.0, 0.0, 0.0], dtype='float64')
+        self.error_i = np.array([0.0, 0.0, 0.0], dtype='float64')
         self.error_d = np.array([0.0, 0.0, 0.0], dtype='float64')
 
         self.rate = rospy.Rate(10)
@@ -62,7 +63,7 @@ class Controller:
         self.error_i = self.error * dt
         q = np.array(angles).T # self.detect_joint_angles(image) # estimate initial value of joints'
         J_inv = np.linalg.pinv(jacobian(angles)) # np.linalg.pinv(self.calculate_jacobian(image))  # calculating the psudeo inverse of Jacobian
-        dq_d = np.dot(J_inv, (np.dot(K_d, self.error_d.transpose()) + np.dot(K_i, self.error_i) + np.dot(K_p, self.error.transpose())))  # control input (angular velocity of joints)
+        dq_d = np.dot(J_inv, (np.dot(K_d, self.error_d.transpose()) + np.dot(K_i, self.error_i.transpose()) + np.dot(K_p, self.error.transpose())))  # control input (angular velocity of joints)
         q_d = q + (dt * dq_d)  # control input (angular position of joints)
         #print('q:', q_d)
         return q_d
