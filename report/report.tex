@@ -40,9 +40,9 @@ Github link: \url{https://github.com/Siliconlad/ivr\_assignment}
 \noindent Finally & in the \texttt{joint\_angles} node we take the 3D positions of the green and red joint from the \texttt{fusion} node and & using the forward kinematics equations & calculate the joint angles.
 
 \begin{center}
-    \includegraphics[width=0.7\textwidth]{theta-2} \\
-    \includegraphics[width=0.7\textwidth]{theta-3} \\
-    \includegraphics[width=0.7\textwidth]{theta-4} \\
+    \includegraphics[width=0.6\textwidth]{theta-2} \\
+    \includegraphics[width=0.6\textwidth]{theta-3} \\
+    \includegraphics[width=0.6\textwidth]{theta-4} \\
 \end{center}
 
 \section{Target Detection}
@@ -65,7 +65,7 @@ To get the position of the target sphere & we first detect the sphere in the ima
 \end{itemize}
 
 \begin{center}
-	\includegraphics[width=0.7\textwidth]{target-sphere}
+	\includegraphics[width=0.6\textwidth]{target-sphere}
 \end{center}
 
 \section{Forward Kinematics}
@@ -124,7 +124,7 @@ B_{11} & B_{12} & B_{13} & B_{14} \\
 \end{bmatrix}
 \end{equation}
 $ 
-\end{center} \\
+\end{center}
 where
 $
 \begin{align*}
@@ -153,11 +153,19 @@ C_{14} &= - 3 c(\theta_4) s(\theta_2) - 3 c(\theta_2) c(\theta_3) s(\theta_4)
 $
 
 \begin{center}
-\includegraphics[width=0.7\textwidth]{figures/x-position-1.png}
-\includegraphics[width=0.7\textwidth]{figures/y-position-1.png}
-\includegraphics[width=0.7\textwidth]{figures/z-position.png}
+\includegraphics[width=0.6\textwidth]{figures/x-pos.png}
+\includegraphics[width=0.6\textwidth]{figures/y-pos.png}
+\includegraphics[width=0.6\textwidth]{figures/z-pos.png}
 \end{center}
 
 \section{Null Space Controller}
+
+To utilize the robot's redundancy to make sure the robot doesn't hit the orange box while the end effector still follows the sphere, we use a secondary objective: the distance to the box.
+\begin{enumerate}
+	\item Find changes in angle and changes in distance between end-effector and box based on previous time step.
+	\item Take derivative of distances with respect to changes in angle.
+	\item Multiply by null space projection matrix and add to end-effector control input.
+\end{enumerate}
+This differs from the original controller in that now we are also accounting for a distance with the box when calculating the control input for the joint angles.
 
 \end{document}
