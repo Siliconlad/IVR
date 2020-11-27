@@ -39,6 +39,8 @@ class Controller:
     def control_closed(self, angles, desired_position):
         # P gain
         K_p = np.eye(3) * 0.01
+        # I gain
+        K_i = np.eye(3) * 0
         # D gain
         K_d = np.eye(3) * 0
         # estimate time step
@@ -56,9 +58,11 @@ class Controller:
         self.error_d = ((pos_d - pos) - self.error) / dt
         # estimate error
         self.error = pos_d - pos
+        # estimate integral of error
+        self.error_i = self.error * dt
         q = np.array(angles).T # self.detect_joint_angles(image) # estimate initial value of joints'
         J_inv = np.linalg.pinv(jacobian(angles)) # np.linalg.pinv(self.calculate_jacobian(image))  # calculating the psudeo inverse of Jacobian
-        dq_d = np.dot(J_inv, (np.dot(K_d, self.error_d.transpose()) + np.dot(K_p, self.error.transpose())))  # control input (angular velocity of joints)
+        dq_d = np.dot(J_inv, (np.dot(K_d, self.error_d.transpose()) + np.dot(K_i, self.error_i) + np.dot(K_p, self.error.transpose())))  # control input (angular velocity of joints)
         q_d = q + (dt * dq_d)  # control input (angular position of joints)
         #print('q:', q_d)
         return q_d
