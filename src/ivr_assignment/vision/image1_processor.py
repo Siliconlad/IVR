@@ -12,8 +12,6 @@ from sensor_msgs.msg import Image
 from ivr_assignment.msg import StateStamped
 
 
-# TODO: save position of blue joint in case it gets covered
-
 class Image1Processor:
 
     def __init__(self):
@@ -51,7 +49,7 @@ class Image1Processor:
         #########################
 
         # Get yellow center
-        _, cv_image = ivr_vision.get_yellow_joint(hsv, cv_image)
+        y_center, cv_image = ivr_vision.get_yellow_joint(hsv, cv_image)
 
         # Get red center
         r_center, cv_image = ivr_vision.get_red_joint(hsv, cv_image)
@@ -71,7 +69,7 @@ class Image1Processor:
 
         # Get yellow center
         if self.y_center is None:
-            self.y_center, _ = ivr_vision.get_yellow_joint(hsv)
+            self.y_center = y_center
 
             # Calculate pixel to meter ratio
             yb_ratio = 2.5 / np.linalg.norm(self.y_center - b_center)

@@ -1,8 +1,5 @@
-import rospy
 import numpy as np
 import cv2 as cv
-
-from scipy.cluster.vq import kmeans2, kmeans
 
 import ivr_assignment.utils as ivr_utils
 import ivr_assignment.utils.mask as ivr_mask
@@ -106,11 +103,7 @@ def get_yellow_joint(hsv, cv_image=None):
 
 
 def get_targets(hsv, template_sphere, template_box, cv_image=None):
-    # TODO: Assumes at least one target is always visible
-
-    ##########################
-    #    Chamfer Matching    #
-    ##########################
+    # Note: Assumes at least one target is always visible
 
     # Get orange mask
     o_mask = ivr_mask.orange_mask(hsv)

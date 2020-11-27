@@ -51,7 +51,7 @@ class Image2Processor:
         ##########################
 
         # Get yellow center
-        _, cv_image = ivr_vision.get_yellow_joint(hsv, cv_image)
+        y_center, cv_image = ivr_vision.get_yellow_joint(hsv, cv_image)
 
         # Get red center
         r_center, cv_image = ivr_vision.get_red_joint(hsv, cv_image)
@@ -71,7 +71,7 @@ class Image2Processor:
 
         # Get yellow center
         if self.y_center is None:
-            self.y_center, _ = ivr_vision.get_yellow_joint(hsv)
+            self.y_center = y_center
 
             # Calculate pixel to meter ratio
             yb_ratio = 2.5 / np.linalg.norm(self.y_center - b_center)

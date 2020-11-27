@@ -1,2 +1,10 @@
-__pycache__
+__pycache__/
 .DS_Store
+
+report/*.bak
+report/*.auxOB
+report/*.log
+report/*.out
+report/*.aux
+
+.idea/
