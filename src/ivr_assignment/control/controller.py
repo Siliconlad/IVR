@@ -3,7 +3,7 @@ import cv2
 import numpy as np
 from std_msgs.msg import Float64
 
-from ivr_assignment.msg import StateStamped
+from ivr_assignment.msg import StateStamped, PointStamped
 from ivr_assignment.utils import jacobian, fk
 
 
@@ -12,10 +12,12 @@ class Controller:
     def __init__(self):
         rospy.init_node('controller')
 
-        self.robot_joint1_pub = rospy.Publisher("/robot/joint1_position_controller/command", Float64, queue_size=10)
-        self.robot_joint2_pub = rospy.Publisher("/robot/joint2_position_controller/command", Float64, queue_size=10)
-        self.robot_joint3_pub = rospy.Publisher("/robot/joint3_position_controller/command", Float64, queue_size=10)
-        self.robot_joint4_pub = rospy.Publisher("/robot/joint4_position_controller/command", Float64, queue_size=10)
+        self.robot_joint1_pub = rospy.Publisher("/robot/joint1_position_controller/command", Float64, queue_size=1)
+        self.robot_joint2_pub = rospy.Publisher("/robot/joint2_position_controller/command", Float64, queue_size=1)
+        self.robot_joint3_pub = rospy.Publisher("/robot/joint3_position_controller/command", Float64, queue_size=1)
+        self.robot_joint4_pub = rospy.Publisher("/robot/joint4_position_controller/command", Float64, queue_size=1)
+
+        self.red_pub = rospy.Publisher("/control/red", PointStamped, queue_size=1)
 
         self.sphere_sub = rospy.Subscriber("/fusion/state", StateStamped, self.callback)
         self.angles = np.array([0.0, 0.0, 0.0, 0.0])
@@ -29,9 +31,9 @@ class Controller:
 
     def control_closed(self, angles, desired_position):
         # P gain
-        K_p = np.eye(3) * 1.9
+        K_p = np.eye(3) * 2.0
         # D gain
-        K_d = np.eye(3) * 0.1
+        K_d = np.eye(3) * 0.5
 
         # Calculate time step
         cur_time = np.array([rospy.get_time()])
@@ -78,6 +80,16 @@ class Controller:
         self.robot_joint2_pub.publish(self.joint2)
         self.robot_joint3_pub.publish(self.joint3)
         self.robot_joint4_pub.publish(self.joint4)
+
+        end_effector_pos, _ = fk(self.angles)
+        end_effector_pos = end_effector_pos.reshape(-1,)
+
+        msg = PointStamped()
+        msg.header.stamp = rospy.Time.now()
+        msg.point.x = end_effector_pos[0]
+        msg.point.y = end_effector_pos[1]
+        msg.point.z = end_effector_pos[2]
+        self.red_pub.publish(msg)
 
 
 def main():
