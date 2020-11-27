@@ -29,7 +29,7 @@ class Controller:
 
     def control_closed(self, angles, desired_position, current_position):
         # P gain
-        K_p = np.eye(3) * 1.9
+        K_p = np.eye(3) * 2.0
         # D gain
         K_d = np.eye(3) * 0
 

@@ -70,7 +70,3 @@ def main():
         j_controller.loop()
     except ROSInterruptException:
         print("Shutting down...")
-
-
-if __name__ == '__main__':
-    main()

@@ -12,8 +12,6 @@ from sensor_msgs.msg import Image
 from ivr_assignment.msg import StateStamped
 
 
-# TODO: save position of blue joint in case it gets covered
-
 class Image2Processor:
 
     def __init__(self):
