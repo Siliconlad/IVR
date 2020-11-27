@@ -44,7 +44,7 @@ class Controller:
         pos = np.array(current_position).reshape(1, -1)
 
         # Desired trajectory
-        pos_d = np.array(desired_position).reshape(1, -1)
+        pos_d = desired_position.reshape(1, -1)
 
         # Estimate derivative of error
         self.error_d = ((pos_d - pos) - self.error) / dt
@@ -68,14 +68,14 @@ class Controller:
         q_d = self.control_closed(self.angles, sphere_pos, red_pos)
         self.angles = q_d.reshape(-1,)
         #q_d = self.control_open(cv_image)
-        self.joint1=Float64()
-        self.joint1.data= q_d[0]
-        self.joint2=Float64()
-        self.joint2.data= q_d[1]
-        self.joint3=Float64()
-        self.joint3.data= q_d[2]
-        self.joint4=Float64()
-        self.joint4.data= q_d[3]
+        self.joint1 = Float64()
+        self.joint1.data = q_d[0]
+        self.joint2 = Float64()
+        self.joint2.data = q_d[1]
+        self.joint3 = Float64()
+        self.joint3.data = q_d[2]
+        self.joint4 = Float64()
+        self.joint4.data = q_d[3]
 
         self.robot_joint1_pub.publish(self.joint1)
         self.robot_joint2_pub.publish(self.joint2)
