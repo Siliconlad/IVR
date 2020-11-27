@@ -1,6 +1,7 @@
 \documentclass[11pt]{article}
 \usepackage{hyperref}
 \usepackage{graphicx}
+\usepackage{amsmath}
 \graphicspath{ {./figures/} }
 
 \usepackage[a4paper, left=1.2cm, right=1.2cm, top=1cm, bottom=1cm]{geometry}
@@ -19,9 +20,10 @@ Robot Control: Austin Pan \\
 Null-space Control: Austin Pan \& Angus Stewart \\
 Github link: \url{https://github.com/Siliconlad/ivr\_assignment}
 
-\section{Joint State Estimation} \label{jse:alg}
+\section{Joint State Estimation} \label{jse}
+\textbf{Note:} for joint 4 we use $\frac{\pi}{3} \sin(\frac{\pi}{20} * t)$ instead of $\frac{\pi}{2} \sin(\frac{\pi}{20} * t)$ as permitted in the follow-up to \href{https://piazza.com/class/kee5t8gp4du6mm?cid=164}{this Piazza post}. \\
 
-First, we do joint detection on the images from camera 1 \& 2 (in \texttt{image1\_processor} and \texttt{image2\_processor})
+\noindent First, we do joint detection on the images from camera 1 \& 2 (in \texttt{image1\_processor} and \texttt{image2\_processor})
 \begin{enumerate}
     \item Threshold the HSV image based on the joint colour, find the contour and its center. Take the average of the centres if there's more than one contour. If there are no contours, the joint is hidden.
     \item If the yellow joint has not been detected before, store the center and calculate \texttt{pixel\_to\_meters}.
@@ -47,13 +49,13 @@ First, we do joint detection on the images from camera 1 \& 2 (in \texttt{image1
 
 To get the position of the target sphere, we first detect the sphere in the images from camera 1 and 2:
 \begin{enumerate}
-	\item Threshold the image in the same way as in section \ref{jse:alg} with the orange color.
+	\item Threshold the image in the same way as in section \ref{jse} with the orange color.
 	\item Use preselected templates of the target sphere and box and match these to the thresholded image. From this we obtain the centre of the areas matched by each template as well as a numerical measure of how well the template matched the area.
 	\item If the centers are within a certain distance of each other, we consider the templates to have matched the same object, hence the object corresponding to the template with the lower score must be hidden.
-	\item The centers are then shifted and converted to meters as described in section \ref{jse:alg}.
+	\item The centers are then shifted and converted to meters as described in section \ref{jse}.
 \end{enumerate}
 
-\noindent The results are then combined to form the 3D position in the same way as described in section \ref{jse:alg}.
+\noindent The results are then combined to form the 3D position in the same way as described in section \ref{jse}.
 
 \noindent Some sources of error for our position estimate of the target sphere include:
 \begin{itemize}
@@ -65,5 +67,48 @@ To get the position of the target sphere, we first detect the sphere in the imag
 \begin{center}
 	\includegraphics[width=0.7\textwidth]{target-sphere}
 \end{center}
+
+\section{Forward Kinematics}
+
+Our forward kinematics equation is given by
+\begin{equation*}
+\begin{bmatrix}
+x_e \\
+y_e \\
+z_e
+\end{bmatrix}
+= 
+\begin{bmatrix}
+3.5s(\theta_1)s(\theta_2)c(\theta_3) + 3.5c(\theta_1)s(\theta_3) + 3s(\theta_1)c(\theta_2)s(\theta_4) + 3s(\theta_1)s(\theta_2)c(\theta_3)c(\theta_4) + 3c(\theta_1)s(\theta_3)c(\theta_4) \\
+
+3.5s(\theta_1)s(\theta_3) - 3.5c(\theta_1)s(\theta_2)c(\theta_3) + 3s(\theta_1)s(\theta_3)c(\theta_4) - 3c(\theta_1)s(\theta_2)c(\theta_3)c(\theta_4) - 3c(\theta_1)c(\theta_2)s(\theta_4)) \\
+
+3.5c(\theta_2)c(\theta_3) + 3c(\theta_2)c(\theta_3)c(\theta_4) - 3s(\theta_2)s(\theta_4) + 2.5
+\end{bmatrix}
+\end{equation*}
+
+
+\noindent Below is a table of 10 different configurations of the robot joints and the corresponding estimates of the end-effector position using forward kinematics and computer vision (from section \ref{jse}).
+
+\begin{center}
+    \begin{tabular}{ |r|r|r|r||r|r|r|r|r|r|} \hline
+        \multicolumn{4}{|c||}{Joint Configuration} & \multicolumn{3}{|c|}{Forward Kinematics} & \multicolumn{3}{|c|}{Computer Vision} \\ \hline
+        \multicolumn{1}{|c|}{$\theta_1$} & \multicolumn{1}{|c|}{$\theta_2$} & \multicolumn{1}{|c|}{$\theta_3$} & \multicolumn{1}{|c||}{$\theta_4$} & \multicolumn{1}{|c|}{x} & \multicolumn{1}{|c|}{y} & \multicolumn{1}{|c|}{z} & \multicolumn{1}{|c|}{x} & \multicolumn{1}{|c|}{y} & \multicolumn{1}{|c|}{z} \\ \hline
+         0.5 &  0.5 &  0.5 &  0.5 &  4.422 & -1.962 & 6.534 & 5.259 & -2.788 & 6.691 \\
+         0.2 &  1.0 &  0.2 &  1.0 &  2.107 & -5.274 & 3.087 & 3.250 & -6.304 & 2.050 \\
+         1.0 &  1.0 &  0.4 &  0.4 &  5.934 & -0.911 & 4.634 & 6.575 & -1.315 & 4.196 \\
+         0.2 &  0.4 &  0.6 &  0.8 &  3.844 & -3.076 & 5.911 & 4.989 & -4.108 & 5.859 \\
+         0.8 &  0.6 &  0.3 &  0.1 &  4.022 & -1.235 & 7.444 & 4.599 & -1.586 & 7.793 \\
+        -0.9 &  0.6 & -0.7 &  0.3 & -5.276 &  1.049 & 6.018 & -5.298 & 0.696 & 5.801 \\
+        -0.2 & -0.8 & -0.6 &  0.2 & -2.889 &  4.052 & 6.631 & -2.592 & 3.518 & 6.323 \\
+         1.2 & -1.0 &  0.7 & -0.3 & -2.779 &  5.481 & 4.385 & -2.425 & 4.834 & 4.351 \\
+        -0.3 & -1.2 &  0.8 & -0.7 &  5.290 &  3.035 & 2.162 & 4.602 & 4.834 & 1.354  \\
+         1.1 &  1.1 & -1.1 & -1.1 & -1.294 & -4.202 & 5.883 & -1.508 & -4.177 & 5.879 \\ \hline
+    \end{tabular}
+\end{center}
+
+% INSERT EXPLANATION HERE
+
+\section{Closed-loop Control}
 
 \end{document}
