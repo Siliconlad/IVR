@@ -17,8 +17,6 @@ class Controller:
         self.robot_joint3_pub = rospy.Publisher("/robot/joint3_position_controller/command", Float64, queue_size=1)
         self.robot_joint4_pub = rospy.Publisher("/robot/joint4_position_controller/command", Float64, queue_size=1)
 
-        self.red_pub = rospy.Publisher("/control/red", PointStamped, queue_size=1)
-
         self.sphere_sub = rospy.Subscriber("/fusion/state", StateStamped, self.callback)
         self.angles = np.array([0.0, 0.0, 0.0, 0.0])
 
@@ -29,11 +27,11 @@ class Controller:
         self.error = np.array([[0.0, 0.0, 0.0]], dtype='float64')
         self.error_d = np.array([[0.0, 0.0, 0.0]], dtype='float64')
 
-    def control_closed(self, angles, desired_position):
+    def control_closed(self, angles, desired_position, current_position):
         # P gain
-        K_p = np.eye(3) * 2.0
+        K_p = np.eye(3) * 1.9
         # D gain
-        K_d = np.eye(3) * 0.5
+        K_d = np.eye(3) * 0
 
         # Calculate time step
         cur_time = np.array([rospy.get_time()])
@@ -41,8 +39,9 @@ class Controller:
         self.time_previous_step = cur_time
 
         # Robot end-effector position
-        pos, _ = fk(angles)
-        pos = pos.reshape(1, -1)
+        # pos, _ = fk(angles)
+        # pos = pos.reshape(1, -1)
+        pos = np.array(current_position).reshape(1, -1)
 
         # Desired trajectory
         pos_d = np.array(desired_position).reshape(1, -1)
@@ -62,9 +61,11 @@ class Controller:
 
     def callback(self, data):
         sphere = data.state.sphere
+        red = data.state.red
+        red_pos = [red.x, red.y, red.z]
         sphere_pos = [sphere.x, sphere.y, sphere.z]
 
-        q_d = self.control_closed(self.angles, sphere_pos)
+        q_d = self.control_closed(self.angles, sphere_pos, red_pos)
         self.angles = q_d.reshape(-1,)
         #q_d = self.control_open(cv_image)
         self.joint1=Float64()
@@ -80,16 +81,6 @@ class Controller:
         self.robot_joint2_pub.publish(self.joint2)
         self.robot_joint3_pub.publish(self.joint3)
         self.robot_joint4_pub.publish(self.joint4)
-
-        end_effector_pos, _ = fk(self.angles)
-        end_effector_pos = end_effector_pos.reshape(-1,)
-
-        msg = PointStamped()
-        msg.header.stamp = rospy.Time.now()
-        msg.point.x = end_effector_pos[0]
-        msg.point.y = end_effector_pos[1]
-        msg.point.z = end_effector_pos[2]
-        self.red_pub.publish(msg)
 
 
 def main():
