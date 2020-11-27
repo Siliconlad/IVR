@@ -15,7 +15,7 @@ def centroid(m):
     cx = m['m10'] // m['m00']
     cy = m['m01'] // m['m00']
 
-    return np.array([y_cx, y_cy])
+    return np.array([cx, cy])
 
 
 def fk(angles):
