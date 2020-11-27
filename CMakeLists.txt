@@ -185,15 +185,15 @@ include_directories(
 ## Mark executable scripts (Python etc.) for installation
 ## in contrast to setup.py, you can choose the destination
 catkin_install_python(
-        PROGRAMS scripts/fusion.py
+        PROGRAMS scripts/controller.py
+                 scripts/fk.py
+                 scripts/fusion.py
                  scripts/image1_processor.py
                  scripts/image2_processor.py
                  scripts/joint_angles.py
                  scripts/joint_controller.py
                  scripts/save_image.py
                  scripts/target_move.py
-                 scripts/fk.py
-                 scripts/angles.py
         DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
