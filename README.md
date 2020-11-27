@@ -14,4 +14,4 @@ The forward kinematics matrix helper function can be found in `src/utils/utils.p
 The Jacobian matrix helper function can be found in `src/utils/utils.py` and the node that controls the robot movement to follow the target is `controller.py`.
 
 ## 4.2 Null Space Control
-Run using `null_space_controller.py`.
+Run using the node `null_space_controller.py`.
