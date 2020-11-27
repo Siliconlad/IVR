@@ -44,7 +44,7 @@ class Controller:
         pos = np.array(current_position).reshape(1, -1)
 
         # Desired trajectory
-        pos_d = desired_position.reshape(1, -1)
+        pos_d = np.array(desired_position).reshape(1, -1)
 
         # Estimate derivative of error
         self.error_d = ((pos_d - pos) - self.error) / dt
