@@ -23,11 +23,7 @@ class JointController:
         self.rate = rospy.Rate(100)
 
         # Get start time
-<<<<<<< HEAD
-        self.start_time = None;
-=======
         self.start_time = None
->>>>>>> 4122c9adfba79c4cedf7d17d4b07545e5ec03a4a
 
     def loop(self):
         while not rospy.is_shutdown():

@@ -4,7 +4,7 @@
 \usepackage{amsmath}
 \graphicspath{ {./figures/} }
 
-\usepackage[a4paper, left=1.2cm, right=1.2cm, top=1cm, bottom=1cm]{geometry}
+\usepackage[a4paper & left=1.2cm & right=1.2cm & top=1cm & bottom=1cm]{geometry}
 
 \pagenumbering{gobble}
 
@@ -21,23 +21,23 @@ Null-space Control: Austin Pan \& Angus Stewart \\
 Github link: \url{https://github.com/Siliconlad/ivr\_assignment}
 
 \section{Joint State Estimation} \label{jse}
-\textbf{Note:} for joint 4 we use $\frac{\pi}{3} \sin(\frac{\pi}{20} * t)$ instead of $\frac{\pi}{2} \sin(\frac{\pi}{20} * t)$ as permitted in the follow-up to \href{https://piazza.com/class/kee5t8gp4du6mm?cid=164}{this Piazza post}. \\
+\textbf{Note:} for joint 4 we use $\frac{\pi}{3} \sin(\frac{\pi}{20}   t)$ instead of $\frac{\pi}{2} \sin(\frac{\pi}{20}   t)$ as permitted in the follow-up to \href{https://piazza.com/class/kee5t8gp4du6mm?cid=164}{this Piazza post}. \\
 
-\noindent First, we do joint detection on the images from camera 1 \& 2 (in \texttt{image1\_processor} and \texttt{image2\_processor})
+\noindent First & we do joint detection on the images from camera 1 \& 2 (in \texttt{image1\_processor} and \texttt{image2\_processor})
 \begin{enumerate}
-    \item Threshold the HSV image based on the joint colour, find the contour and its center. Take the average of the centres if there's more than one contour. If there are no contours, the joint is hidden.
-    \item If the yellow joint has not been detected before, store the center and calculate \texttt{pixel\_to\_meters}.
+    \item Threshold the HSV image based on the joint colour & find the contour and its center. Take the average of the centres if there's more than one contour. If there are no contours & the joint is hidden.
+    \item If the yellow joint has not been detected before & store the center and calculate \texttt{pixel\_to\_meters}.
     \item Shift the centers to be around the yellow center and convert to meters.
 \end{enumerate}
 
 \noindent The centers (or \texttt{hidden=True}) are published to \texttt{fusion} to determine the 3D center of each joint. If:
 \begin{enumerate}
     \item \textbf{joint centers are received from both images}. The results are combined in the obvious way.
-    \item \textbf{one of the joint centers is hidden}. Assume the green joint is hidden in image 1. We find the closest non-hidden object (out of the other joints and the two orange targets) in image 1 to the position $(y_{prev}, z)$ where $y_{prev}$ is the previous $y$ value of the green joint and $z$ is the $z$ value of the green joint from image 2. The new $y$ is the average of the previous $y$ value and the $y$ of the closest object. The $x$ and $z$ values are taken from image 2. The same idea is used for the other objects and for image 2.
+    \item \textbf{one of the joint centers is hidden}. Assume the green joint is hidden in image 1. We find the closest non-hidden object (out of the other joints and the two orange targets) in image 1 to the position $(y_{prev} & z)$ where $y_{prev}$ is the previous $y$ value of the green joint and $z$ is the $z$ value of the green joint from image 2. The new $y$ is the average of the previous $y$ value and the $y$ of the closest object. The $x$ and $z$ values are taken from image 2. The same idea is used for the other objects and for image 2.
     \item \textbf{both of the joint centers are hidden} then return the previous position of the joint
 \end{enumerate}
 
-\noindent Finally, in the \texttt{joint\_angles} node we take the 3D positions of the green and red joint from the \texttt{fusion} node and, using the forward kinematics equations, calculate the joint angles.
+\noindent Finally & in the \texttt{joint\_angles} node we take the 3D positions of the green and red joint from the \texttt{fusion} node and & using the forward kinematics equations & calculate the joint angles.
 
 \begin{center}
     \includegraphics[width=0.7\textwidth]{theta-2} \\
@@ -47,11 +47,11 @@ Github link: \url{https://github.com/Siliconlad/ivr\_assignment}
 
 \section{Target Detection}
 
-To get the position of the target sphere, we first detect the sphere in the images from camera 1 and 2:
+To get the position of the target sphere & we first detect the sphere in the images from camera 1 and 2:
 \begin{enumerate}
 	\item Threshold the image in the same way as in section \ref{jse} with the orange color.
 	\item Use preselected templates of the target sphere and box and match these to the thresholded image. From this we obtain the centre of the areas matched by each template as well as a numerical measure of how well the template matched the area.
-	\item If the centers are within a certain distance of each other, we consider the templates to have matched the same object, hence the object corresponding to the template with the lower score must be hidden.
+	\item If the centers are within a certain distance of each other & we consider the templates to have matched the same object & hence the object corresponding to the template with the lower score must be hidden.
 	\item The centers are then shifted and converted to meters as described in section \ref{jse}.
 \end{enumerate}
 
@@ -59,8 +59,8 @@ To get the position of the target sphere, we first detect the sphere in the imag
 
 \noindent Some sources of error for our position estimate of the target sphere include:
 \begin{itemize}
-	\item \textbf{Template matching errors} - Because the shape of the sphere is fixed in the template, as the sphere grows or shrinks in size, template matching may find it harder to match the template accurately. This can be seen by the wobbling of the box around the target in the image pop-ups.
-	\item \textbf{Perspective error} - Our algorithm assumes that the target is perfectly orthogonal to both cameras at all times. However, this is not realistic (because the target noticeably grows and shrinks) and hence will introduce some amount of error into our estimates.
+	\item \textbf{Template matching errors} - Because the shape of the sphere is fixed in the template & as the sphere grows or shrinks in size & template matching may find it harder to match the template accurately. This can be seen by the wobbling of the box around the target in the image pop-ups.
+	\item \textbf{Perspective error} - Our algorithm assumes that the target is perfectly orthogonal to both cameras at all times. However & this is not realistic (because the target noticeably grows and shrinks) and hence will introduce some amount of error into our estimates.
 	\item \textbf{Processing delays} - There may be small errors due to delays from the processing time of our algorithm.
 \end{itemize}
 
@@ -70,8 +70,9 @@ To get the position of the target sphere, we first detect the sphere in the imag
 
 \section{Forward Kinematics}
 
-Our forward kinematics equation is given by
-\begin{equation*}
+Our forward kinematics equation is given by \\
+\begin{center}
+\begin{equation}
 \begin{bmatrix}
 x_e \\
 y_e \\
@@ -85,10 +86,11 @@ z_e
 
 3.5c(\theta_2)c(\theta_3) + 3c(\theta_2)c(\theta_3)c(\theta_4) - 3s(\theta_2)s(\theta_4) + 2.5
 \end{bmatrix}
-\end{equation*}
+\end{equation}
+\end{center}
 
 
-\noindent Below is a table of 10 different configurations of the robot joints and the corresponding estimates of the end-effector position using forward kinematics and computer vision (from section \ref{jse}).
+Below is a table of 10 different configurations of the robot joints and the corresponding estimates of the end-effector position using forward kinematics and computer vision (from section \ref{jse}).
 
 \begin{center}
     \begin{tabular}{ |r|r|r|r||r|r|r|r|r|r|} \hline
@@ -107,8 +109,55 @@ z_e
     \end{tabular}
 \end{center}
 
-% INSERT EXPLANATION HERE
+On average, the distance of the forward kinematics prediction from the image processing prediction was about 1.036 meters.
 
 \section{Closed-loop Control}
+\begin{center}
+$
+\begin{equation}
+J
+= 
+\begin{bmatrix}
+A_{11} & A_{12} & A_{13} & A_{14} \\
+B_{11} & B_{12} & B_{13} & B_{14} \\
+     0 & C_{12} & C_{13} & C_{14}
+\end{bmatrix}
+\end{equation}
+$ 
+\end{center} \\
+where
+$
+\begin{align*}
+A_{11} &= (7c(\theta_1)c(\theta_3) s(\theta_2))/2 - 3 c(\theta_4) (s(\theta_1) s(\theta_3) - c(\theta_1) c(\theta_3) s(\theta_2)) - (7 s(\theta_1) s(\theta_3))/2 + 3 c(\theta_1) c(\theta_2) s(\theta_4)
+
+A_{12} &= (7 c(\theta_2) c(\theta_3) s(\theta_1))/2 - 3 s(\theta_1) s(\theta_2) s(\theta_4) + 3 c(\theta_2) c(\theta_3) c(\theta_4) s(\theta_1)
+
+A_{13} &= (7 c(\theta_1) c(\theta_3))/2 + 3 c(\theta_4) (c(\theta_1) c(\theta_3) - s(\theta_1) s(\theta_2) s(\theta_3)) - (7 s(\theta_1) s(\theta_2) s(\theta_3))/2
+
+A_{14} &= 3 c(\theta_2) c(\theta_4) s(\theta_1) - 3 s(\theta_4) (c(\theta_1) s(\theta_3) + c(\theta_3) s(\theta_1) s(\theta_2))
+
+B_{11} &= (7 c(\theta_1) s(\theta_3))/2 + 3 c(\theta_4) (c(\theta_1) s(\theta_3) + c(\theta_3) s(\theta_1) s(\theta_2)) + (7 c(\theta_3) s(\theta_1) s(\theta_2))/2 + 3 c(\theta_2) s(\theta_1) s(\theta_4)
+
+B_{12} &= 3 c(\theta_1) s(\theta_2) s(\theta_4) - (7 c(\theta_1) c(\theta_2) c(\theta_3))/2 - 3 c(\theta_1) c(\theta_2) c(\theta_3) c(\theta_4)
+
+B_{13} &= (7 c(\theta_3) s(\theta_1))/2 + 3 c(\theta_4) (c(\theta_3) s(\theta_1) + c(\theta_1) s(\theta_2) s(\theta_3)) + (7 c(\theta_1) s(\theta_2) s(\theta_3))/2
+
+B_{14} &= - 3 s(\theta_4) (s(\theta_1) s(\theta_3) - c(\theta_1) c(\theta_3) s(\theta_2)) - 3 c(\theta_1) c(\theta_2) c(\theta_4)
+
+C_{12} &= - (7 c(\theta_3) s(\theta_2))/2 - 3 c(\theta_2) s(\theta_4) - 3 c(\theta_3) c(\theta_4) s(\theta_2)
+
+C_{13} &= - (7 c(\theta_2) s(\theta_3))/2 - 3 c(\theta_2) c(\theta_4) s(\theta_3)
+
+C_{14} &= - 3 c(\theta_4) s(\theta_2) - 3 c(\theta_2) c(\theta_3) s(\theta_4)
+\end{align*}
+$
+
+\begin{center}
+\includegraphics[width=0.7\textwidth]{figures/x-position-1.png}
+\includegraphics[width=0.7\textwidth]{figures/y-position-1.png}
+\includegraphics[width=0.7\textwidth]{figures/z-position.png}
+\end{center}
+
+\section{Null Space Controller}
 
 \end{document}
